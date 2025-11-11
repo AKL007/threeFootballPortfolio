@@ -66,6 +66,11 @@ function animate() {
         updateGrass(stadium.userData.grassField, grassTime);
     }
     
+    // Update TIFO cloth simulation
+    if (stadium.userData.tifo) {
+        stadium.userData.tifo.update(delta);
+    }
+    
     updatePlayerMovement(delta, player, ball);
     updateBall(delta, ball);
     updateCamera(delta, camera, player);
