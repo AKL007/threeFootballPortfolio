@@ -50,15 +50,14 @@ export function createStadium() {
     stadiumGroup.add(createAllAdvertisementBoards());
 
     // ----- Stadium Stands (Bleachers) -----
-    stadiumGroup.add(createAllStands());
+    stadiumGroup.add(createAllStands(20));
 
     // ----- TIFO Area (for 'Resume') -----
     // stadiumGroup.add(createTifo());
 
     // ----- Scoreboard (for 'Projects') -----
     // Note: Only the screen is created and added, not the box
-    const scoreboard = createScoreboard();
-    stadiumGroup.add(scoreboard);
+    stadiumGroup.add(createScoreboard());
 
     // ----- Dugout (for 'Analytics') with iPad displays -----
     stadiumGroup.add(createDugout());

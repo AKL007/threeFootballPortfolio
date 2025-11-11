@@ -15,16 +15,18 @@ import * as THREE from 'three';
 export function createStands(x, z, width, depth, baseHeight, rotationY, cornerAffordanceRight, cornerAffordanceLeft) {
     const standsGroup = new THREE.Group();
 
-    const stepHeight = 1.0;
+    const stepHeight = 0.8;
     const stepDepth = 1.0;
+
+    const baseMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true });
 
     // Main stand base
     const base = new THREE.Mesh(
         new THREE.BoxGeometry(width, baseHeight, depth),
-        new THREE.MeshLambertMaterial({ color: 0xda020e, flatShading: true })
+        baseMaterial
     );
     base.position.y = baseHeight / 2;
-    base.position.z = -stepDepth / 2;
+    base.position.z = -stepDepth / 2 + 0.01;
     standsGroup.add(base);
 
 
@@ -68,7 +70,7 @@ export function createStands(x, z, width, depth, baseHeight, rotationY, cornerAf
     for (let i = 0; i < depth; i++) {
         const stair = new THREE.Mesh(
             new THREE.BoxGeometry(width, stepHeight, stepDepth * (depth - i - 1)),
-            new THREE.MeshLambertMaterial({ color: 0xbbbbbb, flatShading: true })
+            new THREE.MeshLambertMaterial({ color: 0xdddddd, flatShading: true })
         );
         stair.position.set(0, baseHeight + stepHeight/2 + (stepHeight * i), i / 2 * stepDepth);
         standsGroup.add(stair);
@@ -83,9 +85,9 @@ export function createStands(x, z, width, depth, baseHeight, rotationY, cornerAf
             for (let k = 0; k < stepHeight; k += stairHeight) {
                 const stair = new THREE.Mesh(
                     new THREE.BoxGeometry(1, stairHeight, stepDepth * (stepHeight - k) / stepHeight),
-                    new THREE.MeshLambertMaterial({ color: 0x000000, flatShading: true })
+                    new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true })
                 );
-                stair.position.set(-width/2 + j, (stepHeight * i) + k + stairHeight/2 + 0.01, -depth/2 + ((i - 1 - 0.3 - 0.01) * stepDepth) + stepDepth/2 + (k / stepHeight) * stepDepth / 2);
+                stair.position.set(-width/2 + j, (stepHeight * i) + k + stairHeight/2 + 0.01, -depth/2 + ((i - 1 - 0.4 - 0.05) * stepDepth) + stepDepth/2 + (k / stepHeight) * stepDepth / 2);
                 standsGroup.add(stair);
             }
         }
@@ -137,7 +139,7 @@ export function createStands(x, z, width, depth, baseHeight, rotationY, cornerAf
     }
 
     // --- CREATE INSTANCED MESHES ---
-    const seatBaseGeometry = new THREE.BoxGeometry(seatWidth * 0.95, seatHeight * 0.5, seatDepth * 0.85);
+    const seatBaseGeometry = new THREE.BoxGeometry(seatWidth * 0.95, seatHeight * 0.5, seatDepth * 0.75);
     const seatBackGeometry = new THREE.BoxGeometry(seatWidth * 0.85, seatHeight * 3, seatDepth * 0.18);
     const seatMaterial = new THREE.MeshLambertMaterial({ color: seatColor, flatShading: true });
     const seatBaseInst = new THREE.InstancedMesh(seatBaseGeometry, seatMaterial, seatCount);
@@ -149,7 +151,7 @@ export function createStands(x, z, width, depth, baseHeight, rotationY, cornerAf
     let seatIdx = 0, seatBackIdx = 0;
     for (let i = 0; i < depth - 3; i++) {
         const y = baseHeight + stepHeight + (stepHeight * i) + seatHeight / 2;
-        const z = -depth / 2 + (i * stepDepth) + seatDepth / 2 + 0.13;
+        const z = -depth / 2 + (i * stepDepth) + seatDepth;
 
         const numberOfSections = Math.floor(width / 20);
         const distanceBetweenStairs = (width - 3) / numberOfSections;
@@ -197,9 +199,8 @@ export function createStands(x, z, width, depth, baseHeight, rotationY, cornerAf
  * Creates all stadium stands around the field.
  * @returns {THREE.Group} Group containing all stadium stands
  */
-export function createAllStands() {
+export function createAllStands(standDepth = 30) {
     const standsGroup = new THREE.Group();
-    const standDepth = 30;
     const baseHeight = 1;
     
     // Add stands on each side of the field
