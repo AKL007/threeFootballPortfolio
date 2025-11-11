@@ -15,16 +15,18 @@ import * as THREE from 'three';
 export function createStands(x, z, width, depth, baseHeight, rotationY, cornerAffordanceRight, cornerAffordanceLeft) {
     const standsGroup = new THREE.Group();
 
+    const stepHeight = 1.0;
+    const stepDepth = 1.0;
+
     // Main stand base
     const base = new THREE.Mesh(
         new THREE.BoxGeometry(width, baseHeight, depth),
         new THREE.MeshLambertMaterial({ color: 0xda020e, flatShading: true })
     );
     base.position.y = baseHeight / 2;
+    base.position.z = -stepDepth / 2;
     standsGroup.add(base);
 
-    const stepHeight = 0.4;
-    const stepDepth = 1.0;
 
     // Railing geometries
     const hypotenuseLength = depth * Math.sqrt(stepHeight * stepHeight + stepDepth * stepDepth);
@@ -62,7 +64,7 @@ export function createStands(x, z, width, depth, baseHeight, rotationY, cornerAf
     topRail.position.set(0, baseHeight + depth * stepHeight, depth / 2 - 0.05);
     standsGroup.add(topRail);
 
-    // Stepped risers
+    // Stepped risers for seating
     for (let i = 0; i < depth; i++) {
         const stair = new THREE.Mesh(
             new THREE.BoxGeometry(width, stepHeight, stepDepth * (depth - i - 1)),
@@ -72,9 +74,24 @@ export function createStands(x, z, width, depth, baseHeight, rotationY, cornerAf
         standsGroup.add(stair);
     }
 
+    // Stepped risers for stairs every 20 meters across the width of the stand
+    const stairHeight = stepHeight / 5;
+    for (let i = 0; i < depth; i++) {
+        const numberOfSections = Math.floor(width / 20);
+        const distanceBetweenStairs = (width - 3) / numberOfSections;
+        for (let j = 1.5; j < width; j += distanceBetweenStairs) {
+            for (let k = 0; k < stepHeight; k += stairHeight) {
+                const stair = new THREE.Mesh(
+                    new THREE.BoxGeometry(1, stairHeight, stepDepth * (stepHeight - k) / stepHeight),
+                    new THREE.MeshLambertMaterial({ color: 0x000000, flatShading: true })
+                );
+                stair.position.set(-width/2 + j, (stepHeight * i) + k + stairHeight/2 + 0.01, -depth/2 + ((i - 1 - 0.3 - 0.01) * stepDepth) + stepDepth/2 + (k / stepHeight) * stepDepth / 2);
+                standsGroup.add(stair);
+            }
+        }
+    }
+
     // (Commented out: future seating capability)
-    // cornerAffordanceRight = cornerAffordanceRight || 0;
-    // cornerAffordanceLeft = width - cornerAffordanceLeft || width - 2;
     // Add seats here if needed
 
     // Final placement
