@@ -53,7 +53,7 @@ export function createStadium() {
     stadiumGroup.add(createAllStands());
 
     // ----- TIFO Area (for 'Resume') -----
-    stadiumGroup.add(createTifo());
+    // stadiumGroup.add(createTifo());
 
     // ----- Scoreboard (for 'Projects') -----
     // Note: Only the screen is created and added, not the box

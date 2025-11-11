@@ -58,10 +58,10 @@ export function createStands(x, z, width, depth, baseHeight, rotationY, cornerAf
 
     // Top rail across back
     const topRail = new THREE.Mesh(
-        new THREE.BoxGeometry(width, 1, 1),
+        new THREE.BoxGeometry(width, 1, depth),
         railMaterial
     );
-    topRail.position.set(0, baseHeight + depth * stepHeight, depth / 2 - 0.05);
+    topRail.position.set(0, baseHeight + depth * stepHeight, 0);
     standsGroup.add(topRail);
 
     // Stepped risers for seating
@@ -90,9 +90,102 @@ export function createStands(x, z, width, depth, baseHeight, rotationY, cornerAf
             }
         }
     }
+    
 
-    // (Commented out: future seating capability)
-    // Add seats here if needed
+    // Improved: Use InstancedMesh for all seats for performance
+    const seatWidth = 1.1;
+    const seatDepth = 0.8;
+    const seatHeight = 0.4;
+    const seatLegHeight = 0.35;
+    const seatColor = 0x35518a;
+    // const seatBackColor = 0x12318a;
+
+    // Spacing between seats
+    const seatGap = 0.3;
+    const seatAndGap = seatWidth + seatGap;
+
+    // Function to determine if x is in a stairway
+    function isInStairway(x, width, distanceBetweenStairs) {
+        for (let stairPos = 1.5; stairPos < width; stairPos += distanceBetweenStairs) {
+            if (Math.abs(x + width / 2 - stairPos) < seatWidth) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // --- COUNT SEATS TO ALLOCATE INSTANCES ---
+    let seatCount = 0;
+    let seatBackCount = 0;
+
+    for (let i = 0; i < depth - 3; i++) {
+        // Same as before
+        const y = baseHeight + stepHeight + (stepHeight * i) + seatHeight / 2;
+        const z = -depth / 2 + (i * stepDepth) + seatDepth / 2 + 0.13;
+        const numberOfSections = Math.floor(width / 20);
+        const distanceBetweenStairs = (width - 3) / numberOfSections;
+
+        for (
+            let x = -width / 2 + seatWidth / 2;
+            x <= width / 2 - seatWidth / 2;
+            x += seatAndGap
+        ) {
+            if (isInStairway(x, width, distanceBetweenStairs)) continue;
+            seatCount++;
+            seatBackCount++;
+        }
+    }
+
+    // --- CREATE INSTANCED MESHES ---
+    const seatBaseGeometry = new THREE.BoxGeometry(seatWidth * 0.95, seatHeight * 0.5, seatDepth * 0.85);
+    const seatBackGeometry = new THREE.BoxGeometry(seatWidth * 0.85, seatHeight * 3, seatDepth * 0.18);
+    const seatMaterial = new THREE.MeshLambertMaterial({ color: seatColor, flatShading: true });
+    const seatBaseInst = new THREE.InstancedMesh(seatBaseGeometry, seatMaterial, seatCount);
+    const seatBackInst = new THREE.InstancedMesh(seatBackGeometry, seatMaterial, seatBackCount);
+    seatBaseInst.castShadow = true;
+    seatBackInst.castShadow = true;
+
+    // --- SET INSTANCE MATRICES ---
+    let seatIdx = 0, seatBackIdx = 0;
+    for (let i = 0; i < depth - 3; i++) {
+        const y = baseHeight + stepHeight + (stepHeight * i) + seatHeight / 2;
+        const z = -depth / 2 + (i * stepDepth) + seatDepth / 2 + 0.13;
+
+        const numberOfSections = Math.floor(width / 20);
+        const distanceBetweenStairs = (width - 3) / numberOfSections;
+
+        for (
+            let x = -width / 2 + seatWidth / 2;
+            x <= width / 2 - seatWidth / 2;
+            x += seatAndGap
+        ) {
+            if (isInStairway(x, width, distanceBetweenStairs)) continue;
+
+            // Seat base
+            {
+                const m = new THREE.Matrix4();
+                m.makeTranslation(x, y, z);
+                seatBaseInst.setMatrixAt(seatIdx, m);
+                seatIdx++;
+            }
+
+            // Seat back
+            {
+                const m = new THREE.Matrix4();
+                m.makeTranslation(x, y + seatHeight * 0.3, z + seatDepth * 0.3);
+                // If seatback needs rotation, add here (commented out as in original)
+                // m.multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2));
+                seatBackInst.setMatrixAt(seatBackIdx, m);
+                seatBackIdx++;
+            }
+        }
+    }
+    // Required after setting matrices so shadows, raycasting, etc, will work
+    seatBaseInst.instanceMatrix.needsUpdate = true;
+    seatBackInst.instanceMatrix.needsUpdate = true;
+
+    standsGroup.add(seatBaseInst);
+    standsGroup.add(seatBackInst);
 
     // Final placement
     standsGroup.position.set(x, 0, z);
