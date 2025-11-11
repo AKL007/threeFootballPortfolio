@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #ui {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            z-index: 100;
+            font-size: 14px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        #instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            z-index: 100;
+            font-size: 12px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        #modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        #modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #ff4444;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .close-btn:hover {
+            background: #ff6666;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <div>Speed: <span id="speed">0</span> km/h</div>
+        <div>Position: <span id="position">0, 0</span></div>
+        <div>GameState: <span id="gamestate">0, 0</span></div>
+    </div>
+
+    <div id="instructions">
+        <strong>Controls:</strong><br>
+        WASD / Arrow Keys: Move player<br>
+        Mouse: Look around<br>
+        Enter: Interact (near penalty spot, dugout, scoreboard)<br>
+        Space: Shoot (in penalty mode)
+    </div>
+
+    <div id="modal">
+        <button class="close-btn" onclick="closeModal()">Close</button>
+        <div id="modal-content"></div>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+</body>
+</html>
+
