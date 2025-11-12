@@ -131,11 +131,24 @@ export function updateCamera(delta, camera, player) {
         return;
     }
     
-    const targetOffset = gameState.cameraOffset.clone();
-    targetOffset.applyQuaternion(player.quaternion);
-    const targetPos = player.position.clone().add(targetOffset);
+    // FIFA-style fixed camera: fixed angle, follows player position but doesn't rotate with player
+    // Camera positioned behind and above player, looking down at an angle
+    const fixedOffset = new THREE.Vector3(0, 25, 30); // Behind (positive Z) and above player
+    const targetPos = player.position.clone().add(fixedOffset);
     
+    // Smoothly follow player position
     camera.position.lerp(targetPos, 0.1);
-    camera.lookAt(player.position);
+    
+    // Always look at player position
+    const targetLookAt = player.position.clone();
+    
+    // Initialize current look-at if not set
+    if (!gameState.currentLookAt) {
+        gameState.currentLookAt = targetLookAt.clone();
+    }
+    
+    // Smoothly interpolate look-at target to prevent warping
+    gameState.currentLookAt.lerp(targetLookAt, 0.15);
+    camera.lookAt(gameState.currentLookAt);
 }
 

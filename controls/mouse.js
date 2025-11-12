@@ -25,8 +25,9 @@ export function setupMouseControls(renderer, player) {
             const maxPitch = Math.PI / 2 - 0.1;
             gameState.flyCameraEuler.x = Math.max(-maxPitch, Math.min(maxPitch, gameState.flyCameraEuler.x));
         } else {
-            // Normal player rotation
-            player.rotation.y -= event.movementX * sensitivity;
+            // FIFA-style fixed camera: mouse rotation disabled
+            // Player rotation is controlled by movement direction only
+            // No mouse rotation in normal gameplay mode
         }
     });
 
