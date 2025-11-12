@@ -8,191 +8,258 @@ import * as THREE from 'three';
  * @param {number} depth - Stepped depth (number of rows)
  * @param {number} baseHeight - Base block height
  * @param {number} rotationY - Orientation (radians)
- * @param {number} cornerAffordanceRight - Offset to ignore right-side (seating affordance)
- * @param {number} cornerAffordanceLeft - Offset to ignore left-side (seating affordance)
  * @returns {THREE.Group} Group containing the stadium stand
  */
-export function createStands(x, z, width, depth, baseHeight, rotationY, cornerAffordanceRight, cornerAffordanceLeft) {
-    const standsGroup = new THREE.Group();
+export function createStands(
+  x,
+  z,
+  width,
+  depth,
+  baseHeight,
+  rotationY
+) {
+  const standsGroup = new THREE.Group();
 
-    const stepHeight = 0.8;
-    const stepDepth = 1.0;
+  //--- CONSTANTS ---
+  const stepHeight = 0.8;
+  const stepDepth = 1.0;
+  const wallHeight = 5;
+  const stairHeight = stepHeight / 5;
+  const baseMaterial = new THREE.MeshLambertMaterial({
+    color: 0xffffff,
+    flatShading: true,
+  });
 
-    const baseMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true });
+  //--- HELPERS ---
+  const addMesh = (geometry, material, position, rotation = null, parent = standsGroup) => {
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(...position);
+    if (rotation) mesh.rotation.set(...rotation);
+    parent.add(mesh);
+    return mesh;
+  };
 
-    // Main stand base
-    const base = new THREE.Mesh(
-        new THREE.BoxGeometry(width, baseHeight, depth),
-        baseMaterial
+  //-- BASE --
+  addMesh(
+    new THREE.BoxGeometry(width, baseHeight, depth),
+    baseMaterial,
+    [0, baseHeight / 2, -stepDepth / 2 + 0.01]
+  );
+
+  //-- STEPPED RISERS FOR SEATING --
+  for (let i = 0; i < depth; i++) {
+    addMesh(
+      new THREE.BoxGeometry(width, stepHeight, stepDepth * (depth - i - 1)),
+      new THREE.MeshLambertMaterial({ color: 0xdddddd, flatShading: true }),
+      [0, baseHeight + stepHeight / 2 + stepHeight * i, (i / 2) * stepDepth]
     );
-    base.position.y = baseHeight / 2;
-    base.position.z = -stepDepth / 2 + 0.01;
-    standsGroup.add(base);
+  }
 
+  //-- BACK WALL SEGMENTS (with 3 cavities) --
+  const numCavities = 3;
+  const cavityWidth = width / 10;
+  const totalCavityWidth = numCavities * cavityWidth;
+  const remainingWidth = width - totalCavityWidth;
+  const segmentWidth = remainingWidth / (numCavities + 1);
 
-    // Railing geometries
-    const hypotenuseLength = depth * Math.sqrt(stepHeight * stepHeight + stepDepth * stepDepth);
-    const railGeometry = new THREE.BoxGeometry(hypotenuseLength + 1, 1, 1);
-    const railEndGeometry = new THREE.BoxGeometry(1, 2, 1);
-    const railMaterial = new THREE.MeshLambertMaterial({ color: 0xda020e, flatShading: true });
+  // Segment positions
+  const segmentPositions = Array.from({ length: numCavities + 1 }, (_, i) =>
+    -width / 2 + segmentWidth / 2 + i * (segmentWidth + cavityWidth)
+  );
+  const wallY = baseHeight + stepHeight * (depth - 1) + wallHeight / 2;
+  const wallZ = depth / 2 - 1;
 
-    // Left rail and end
-    const leftRail = new THREE.Mesh(railGeometry, railMaterial);
-    leftRail.position.set(-width/2 + 0.45, baseHeight + (depth * stepHeight) / 2, 0);
-    leftRail.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
-    leftRail.rotateOnAxis(new THREE.Vector3(0, 0, 1), -Math.atan(stepHeight / stepDepth));
-    standsGroup.add(leftRail);
-
-    const leftRailEnd = new THREE.Mesh(railEndGeometry, railMaterial);
-    leftRailEnd.position.set(-width/2 + 0.45, 0, -depth/2);
-    standsGroup.add(leftRailEnd);
-
-    // Right rail and end
-    const rightRail = new THREE.Mesh(railGeometry, railMaterial);
-    rightRail.position.set(width/2 - 0.45, baseHeight + (depth * stepHeight) / 2, 0);
-    rightRail.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
-    rightRail.rotateOnAxis(new THREE.Vector3(0, 0, 1), -Math.atan(stepHeight / stepDepth));
-    standsGroup.add(rightRail);
-
-    const rightRailEnd = new THREE.Mesh(railEndGeometry, railMaterial);
-    rightRailEnd.position.set(width/2 - 0.45, 0, -depth/2);
-    standsGroup.add(rightRailEnd);
-
-    // Top rail across back
-    const topRail = new THREE.Mesh(
-        new THREE.BoxGeometry(width, 1, depth),
-        railMaterial
+  segmentPositions.forEach((posX) => {
+    addMesh(
+      new THREE.BoxGeometry(segmentWidth, wallHeight, 1),
+      baseMaterial,
+      [posX, wallY, wallZ]
     );
-    topRail.position.set(0, baseHeight + depth * stepHeight, 0);
-    standsGroup.add(topRail);
+  });
 
-    // Stepped risers for seating
-    for (let i = 0; i < depth; i++) {
-        const stair = new THREE.Mesh(
-            new THREE.BoxGeometry(width, stepHeight, stepDepth * (depth - i - 1)),
-            new THREE.MeshLambertMaterial({ color: 0xdddddd, flatShading: true })
+  //-- STAIRS DOWN STAND (every ~20m) --
+  const numberOfSections = Math.floor(width / 20);
+  const distanceBetweenStairs = (width - 3) / numberOfSections;
+  for (let i = 0; i < depth; i++) {
+    for (let j = 1.5; j < width; j += distanceBetweenStairs) {
+      for (let k = 0; k < stepHeight; k += stairHeight) {
+        addMesh(
+          new THREE.BoxGeometry(1, stairHeight, stepDepth * (stepHeight - k) / stepHeight),
+          baseMaterial,
+          [
+            -width / 2 + j,
+            stepHeight * i + k + stairHeight / 2 + 0.01,
+            -depth / 2 + ((i - 1.45) * stepDepth) + stepDepth / 2 + (k / stepHeight) * (stepDepth / 2),
+          ]
         );
-        stair.position.set(0, baseHeight + stepHeight/2 + (stepHeight * i), i / 2 * stepDepth);
-        standsGroup.add(stair);
+      }
     }
+  }
 
-    // Stepped risers for stairs every 20 meters across the width of the stand
-    const stairHeight = stepHeight / 5;
-    for (let i = 0; i < depth; i++) {
-        const numberOfSections = Math.floor(width / 20);
-        const distanceBetweenStairs = (width - 3) / numberOfSections;
-        for (let j = 1.5; j < width; j += distanceBetweenStairs) {
-            for (let k = 0; k < stepHeight; k += stairHeight) {
-                const stair = new THREE.Mesh(
-                    new THREE.BoxGeometry(1, stairHeight, stepDepth * (stepHeight - k) / stepHeight),
-                    new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true })
-                );
-                stair.position.set(-width/2 + j, (stepHeight * i) + k + stairHeight/2 + 0.01, -depth/2 + ((i - 1 - 0.4 - 0.05) * stepDepth) + stepDepth/2 + (k / stepHeight) * stepDepth / 2);
-                standsGroup.add(stair);
-            }
-        }
+  //-- TOP CEILING --
+  const topCeiling = addMesh(
+    new THREE.BoxGeometry(width, 1, (depth * 3) / 4),
+    baseMaterial,
+    [0, baseHeight + (depth - 1) * stepHeight + wallHeight, 2 * stepDepth]
+  );
+
+  //-- FLOODLIGHTS --
+  const floodlightWidth = 5;
+  const floodlightHeight = 2;
+  const floodlightDepth = 2;
+  const minSpacing = 15;
+  const numFloodlights = Math.max(2, Math.floor(width / (floodlightWidth + minSpacing)));
+  const floodlightSpacing = width / numFloodlights;
+  const floodlightY = baseHeight + (depth - 1) * stepHeight + wallHeight + floodlightHeight / 2 + 0.15;
+  const floodlightZ = topCeiling.position.z - (depth * 3) / 8 + 0.1;
+
+  for (let i = 0; i < numFloodlights; i++) {
+    const fx = -width / 2 + (i + 0.5) * floodlightSpacing;
+
+    const housing = new THREE.Mesh(
+      new THREE.BoxGeometry(floodlightWidth, floodlightHeight, floodlightDepth),
+      new THREE.MeshLambertMaterial({ color: 0xd7dadb, emissive: 0x181818, flatShading: true })
+    );
+    housing.position.set(fx, floodlightY, floodlightZ);
+
+    // Cavity (visual only)
+    const cavity = new THREE.Mesh(
+      new THREE.BoxGeometry(
+        floodlightWidth * 0.82,
+        floodlightHeight * 0.60,
+        floodlightDepth * 0.7
+      ),
+      new THREE.MeshLambertMaterial({ color: 0x202833, flatShading: true })
+    );
+    cavity.position.set(0, -0.01, floodlightDepth / 2 - 0.7 * floodlightDepth / 2 - 0.04);
+    housing.add(cavity);
+
+    // 5 Inner lights in cavity
+    for (let j = 0; j < 5; j++) {
+      const cavityWidth = floodlightWidth * 0.82;
+      const cavityHeight = floodlightHeight * 0.60;
+      const boxWidth = cavityWidth * 0.18;
+      const boxHeight = cavityHeight;
+      const boxDepth = 0.08;
+      const xLight = -cavityWidth / 2 + (j + 0.5) * (cavityWidth / 5);
+      const yLight = 0;
+      const zLight = floodlightDepth / 2 - 0.03;
+
+      const innerLight = new THREE.Mesh(
+        new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth),
+        new THREE.MeshLambertMaterial({
+          color: 0xeaf5ff,
+          emissive: 0xbfe7fb,
+          emissiveIntensity: 1.1,
+          flatShading: true,
+        })
+      );
+      innerLight.position.set(xLight, yLight, zLight);
+      housing.add(innerLight);
     }
-    
+    housing.rotation.y = Math.PI;
+    housing.rotation.x = -Math.PI / 9;
+    standsGroup.add(housing);
+  }
 
-    // Improved: Use InstancedMesh for all seats for performance
-    const seatWidth = 1.1;
-    const seatDepth = 0.8;
-    const seatHeight = 0.4;
-    const seatLegHeight = 0.35;
-    const seatColor = 0x35518a;
-    // const seatBackColor = 0x12318a;
+  //-- RAILINGS --
+  const hypotenuseLength = depth * Math.sqrt(stepHeight ** 2 + stepDepth ** 2);
+  const railMaterial = new THREE.MeshLambertMaterial({ color: 0xda020e, flatShading: true });
 
-    // Spacing between seats
-    const seatGap = 0.3;
-    const seatAndGap = seatWidth + seatGap;
+  // Utility for rails
+  const addRail = (side) => {
+    const sign = side === 'left' ? -1 : 1;
+    // Rail
+    const rail = new THREE.Mesh(
+      new THREE.BoxGeometry(hypotenuseLength + 1, 1, 1),
+      railMaterial
+    );
+    rail.position.set(sign * (width / 2 - 0.45), baseHeight + (depth * stepHeight) / 2, 0);
+    rail.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+    rail.rotateOnAxis(new THREE.Vector3(0, 0, 1), -Math.atan(stepHeight / stepDepth));
+    standsGroup.add(rail);
 
-    // Function to determine if x is in a stairway
-    function isInStairway(x, width, distanceBetweenStairs) {
-        for (let stairPos = 1.5; stairPos < width; stairPos += distanceBetweenStairs) {
-            if (Math.abs(x + width / 2 - stairPos) < seatWidth) {
-                return true;
-            }
-        }
-        return false;
+    // Rail end
+    const railEnd = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1), railMaterial);
+    railEnd.position.set(sign * (width / 2 - 0.45), 0, -depth / 2);
+    standsGroup.add(railEnd);
+  };
+
+  addRail('left');
+  addRail('right');
+
+  //-- SEATING: InstancedMesh for performance --
+  const seatWidth = 1.1;
+  const seatDepthValue = 0.8;
+  const seatHeight = 0.4;
+  const seatColor = 0x35518a;
+  const seatGap = 0.3;
+  const seatAndGap = seatWidth + seatGap;
+
+  // Determine stairway seat skip
+  function isInStairway(x, width, dist) {
+    for (let stairPos = 1.5; stairPos < width; stairPos += dist) {
+      if (Math.abs(x + width / 2 - stairPos) < seatWidth) return true;
     }
+    return false;
+  }
 
-    // --- COUNT SEATS TO ALLOCATE INSTANCES ---
-    let seatCount = 0;
-    let seatBackCount = 0;
-
-    for (let i = 0; i < depth - 3; i++) {
-        // Same as before
-        const y = baseHeight + stepHeight + (stepHeight * i) + seatHeight / 2;
-        const z = -depth / 2 + (i * stepDepth) + seatDepth / 2 + 0.13;
-        const numberOfSections = Math.floor(width / 20);
-        const distanceBetweenStairs = (width - 3) / numberOfSections;
-
-        for (
-            let x = -width / 2 + seatWidth / 2;
-            x <= width / 2 - seatWidth / 2;
-            x += seatAndGap
-        ) {
-            if (isInStairway(x, width, distanceBetweenStairs)) continue;
-            seatCount++;
-            seatBackCount++;
-        }
+  // Count seats
+  let seatCount = 0;
+  for (let i = 0; i < depth - 3; i++) {
+    const y = baseHeight + stepHeight + stepHeight * i + seatHeight / 2;
+    const z = -depth / 2 + i * stepDepth + seatDepthValue / 2 + 0.13;
+    for (
+      let xPos = -width / 2 + seatWidth / 2;
+      xPos <= width / 2 - seatWidth / 2;
+      xPos += seatAndGap
+    ) {
+      if (isInStairway(xPos, width, distanceBetweenStairs)) continue;
+      seatCount++;
     }
+  }
 
-    // --- CREATE INSTANCED MESHES ---
-    const seatBaseGeometry = new THREE.BoxGeometry(seatWidth * 0.95, seatHeight * 0.5, seatDepth * 0.75);
-    const seatBackGeometry = new THREE.BoxGeometry(seatWidth * 0.85, seatHeight * 3, seatDepth * 0.18);
-    const seatMaterial = new THREE.MeshLambertMaterial({ color: seatColor, flatShading: true });
-    const seatBaseInst = new THREE.InstancedMesh(seatBaseGeometry, seatMaterial, seatCount);
-    const seatBackInst = new THREE.InstancedMesh(seatBackGeometry, seatMaterial, seatBackCount);
-    seatBaseInst.castShadow = true;
-    seatBackInst.castShadow = true;
+  const seatBaseGeometry = new THREE.BoxGeometry(seatWidth * 0.95, seatHeight * 0.5, seatDepthValue * 0.75);
+  const seatBackGeometry = new THREE.BoxGeometry(seatWidth * 0.85, seatHeight * 3, seatDepthValue * 0.18);
+  const seatMaterial = new THREE.MeshLambertMaterial({ color: seatColor, flatShading: true });
 
-    // --- SET INSTANCE MATRICES ---
-    let seatIdx = 0, seatBackIdx = 0;
-    for (let i = 0; i < depth - 3; i++) {
-        const y = baseHeight + stepHeight + (stepHeight * i) + seatHeight / 2;
-        const z = -depth / 2 + (i * stepDepth) + seatDepth;
+  const seatBaseInst = new THREE.InstancedMesh(seatBaseGeometry, seatMaterial, seatCount);
+  const seatBackInst = new THREE.InstancedMesh(seatBackGeometry, seatMaterial, seatCount);
+  seatBaseInst.castShadow = seatBackInst.castShadow = true;
 
-        const numberOfSections = Math.floor(width / 20);
-        const distanceBetweenStairs = (width - 3) / numberOfSections;
+  // Set seat matrix
+  let idx = 0;
+  for (let i = 0; i < depth - 3; i++) {
+    const y = baseHeight + stepHeight + stepHeight * i + seatHeight / 2;
+    const zBase = -depth / 2 + i * stepDepth + seatDepthValue;
+    for (
+      let xPos = -width / 2 + seatWidth / 2;
+      xPos <= width / 2 - seatWidth / 2;
+      xPos += seatAndGap
+    ) {
+      if (isInStairway(xPos, width, distanceBetweenStairs)) continue;
 
-        for (
-            let x = -width / 2 + seatWidth / 2;
-            x <= width / 2 - seatWidth / 2;
-            x += seatAndGap
-        ) {
-            if (isInStairway(x, width, distanceBetweenStairs)) continue;
+      let mBase = new THREE.Matrix4();
+      mBase.makeTranslation(xPos, y, zBase);
+      seatBaseInst.setMatrixAt(idx, mBase);
 
-            // Seat base
-            {
-                const m = new THREE.Matrix4();
-                m.makeTranslation(x, y, z);
-                seatBaseInst.setMatrixAt(seatIdx, m);
-                seatIdx++;
-            }
+      let mBack = new THREE.Matrix4();
+      mBack.makeTranslation(xPos, y + seatHeight * 0.3, zBase + seatDepthValue * 0.3);
+      seatBackInst.setMatrixAt(idx, mBack);
 
-            // Seat back
-            {
-                const m = new THREE.Matrix4();
-                m.makeTranslation(x, y + seatHeight * 0.3, z + seatDepth * 0.3);
-                // If seatback needs rotation, add here (commented out as in original)
-                // m.multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2));
-                seatBackInst.setMatrixAt(seatBackIdx, m);
-                seatBackIdx++;
-            }
-        }
+      idx++;
     }
-    // Required after setting matrices so shadows, raycasting, etc, will work
-    seatBaseInst.instanceMatrix.needsUpdate = true;
-    seatBackInst.instanceMatrix.needsUpdate = true;
+  }
+  seatBaseInst.instanceMatrix.needsUpdate = true;
+  seatBackInst.instanceMatrix.needsUpdate = true;
 
-    standsGroup.add(seatBaseInst);
-    standsGroup.add(seatBackInst);
+  standsGroup.add(seatBaseInst);
+  standsGroup.add(seatBackInst);
 
-    // Final placement
-    standsGroup.position.set(x, 0, z);
-    standsGroup.rotation.y = rotationY;
-    return standsGroup;
+  //-- FINAL PLACEMENT --
+  standsGroup.position.set(x, 0, z);
+  standsGroup.rotation.y = rotationY;
+  return standsGroup;
 }
 
 /**
@@ -200,15 +267,12 @@ export function createStands(x, z, width, depth, baseHeight, rotationY, cornerAf
  * @returns {THREE.Group} Group containing all stadium stands
  */
 export function createAllStands(standDepth = 30) {
-    const standsGroup = new THREE.Group();
-    const baseHeight = 1;
-    
-    // Add stands on each side of the field
-    standsGroup.add(createStands(0, -60, 120, standDepth, baseHeight, Math.PI, 10, 0));
-    standsGroup.add(createStands(0, 60, 120, standDepth, baseHeight, 0));
-    standsGroup.add(createStands(-80, 0, 80, standDepth, baseHeight, -Math.PI / 2));
-    standsGroup.add(createStands(80, 0, 80, standDepth, baseHeight, Math.PI / 2, 0, 10));
-    
-    return standsGroup;
+  const standsGroup = new THREE.Group();
+  const baseHeight = 1;
+  // Add stands on each side of the field
+  standsGroup.add(createStands(0, -60, 120, standDepth, baseHeight, Math.PI, 10, 0));
+  standsGroup.add(createStands(0, 60, 120, standDepth, baseHeight, 0));
+  standsGroup.add(createStands(-80, 0, 80, standDepth, baseHeight, -Math.PI / 2));
+  standsGroup.add(createStands(80, 0, 80, standDepth, baseHeight, Math.PI / 2, 0, 10));
+  return standsGroup;
 }
-

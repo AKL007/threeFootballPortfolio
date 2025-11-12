@@ -38,7 +38,7 @@ export function updateFlyCamera(delta, camera) {
     if (!gameState.flyMode) return;
     
     const speed = 100; // Movement speed
-    const acceleration = 100; // Acceleration rate
+    const acceleration = 400; // Acceleration rate
     const damping = 0.85; // Velocity damping
     
     // Reset velocity

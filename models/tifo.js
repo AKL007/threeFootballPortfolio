@@ -171,6 +171,15 @@ export function createTifo() {
             }
         }
 
+        // Tether top edge particles back to original positions
+        for (let i = 0; i < numVertices; i++) {
+            const y = Math.floor(i / (SEGMENTS_X + 1));
+            if (y === SEGMENTS_Y) { // Top edge
+                particles[i].copy(originalPositions[i]);
+                velocities[i].set(0, 0, 0); // Reset velocity for fixed particles
+            }
+        }
+
         // Update geometry positions
         for (let i = 0; i < numVertices; i++) {
             positions.setXYZ(

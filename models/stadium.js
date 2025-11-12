@@ -23,7 +23,7 @@ export function createStadium() {
         new THREE.MeshLambertMaterial({ color: 0x555555, flatShading: true })
     );
     ground.rotation.x = -Math.PI / 2;
-    ground.position.set(0, -0.1, 0);
+    ground.position.set(0, -0.05, 0);
     ground.receiveShadow = true;
     stadiumGroup.add(ground);
 
