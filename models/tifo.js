@@ -105,7 +105,7 @@ export function createTifo() {
         flatShading: true
     });
     const tifoMesh = new THREE.Mesh(tifoGeometry, tifoMaterial);
-    tifoMesh.position.set(0, 10.5, -50);
+    tifoMesh.position.set(0, 14.6, -55);
     tifoMesh.userData = { type: 'resume' };
 
     // Wind function (creates varying wind over time)

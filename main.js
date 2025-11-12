@@ -57,8 +57,12 @@ let grassTime = 0;
 
 function animate() {
     const currentTime = performance.now();
-    const delta = (currentTime - lastTime) / 1000;
+    let delta = (currentTime - lastTime) / 1000;
     lastTime = currentTime;
+    
+    // Clamp delta to prevent physics breaking when tab is hidden
+    const MAX_DELTA = 0.1; // 100ms max
+    delta = Math.min(delta, MAX_DELTA);
     
     // Update grass animation
     grassTime += delta;
