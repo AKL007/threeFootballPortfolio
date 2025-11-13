@@ -4,4 +4,6 @@ dist/
 *.log
 .vite/
 /models/glb/*
+/models/fbx/*
 /public/models/glb/*
+/public/models/fbx/*
