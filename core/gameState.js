@@ -15,6 +15,7 @@ export const gameState = {
     originalCameraLook: new THREE.Vector3(),
     flyMode: false,
     flyCameraVelocity: new THREE.Vector3(),
-    flyCameraEuler: new THREE.Euler(0, 0, 0, 'YXZ')
+    flyCameraEuler: new THREE.Euler(0, 0, 0, 'YXZ'),
+    currentLookAt: null
 };
 

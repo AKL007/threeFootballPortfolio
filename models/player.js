@@ -1,39 +1,46 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-export function createPlayer() {
-    const playerGroup = new THREE.Group();
+export function createPlayer(onLoaded) {
+    const loader = new GLTFLoader();
     
-    // Body
-    const bodyGeometry = new THREE.CapsuleGeometry(0.3, 1.2, 4, 4);
-    const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0x0066ff, flatShading: true });
-    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-    body.position.y = 0.6;
-    body.castShadow = true;
-    playerGroup.add(body);
-    
-    // Head
-    const headGeometry = new THREE.SphereGeometry(0.2, 16, 8);
-    const headMaterial = new THREE.MeshLambertMaterial({ color: 0xffdbac, flatShading: true });
-    const head = new THREE.Mesh(headGeometry, headMaterial);
-    head.position.y = 1.5;
-    head.castShadow = true;
-    playerGroup.add(head);
-    
-    // Legs
-    const legGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.8, 4);
-    const legMaterial = new THREE.MeshLambertMaterial({ color: 0x0066ff, flatShading: true });
-    
-    const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
-    leftLeg.position.set(-0.15, 0.4, 0);
-    leftLeg.castShadow = true;
-    playerGroup.add(leftLeg);
-    
-    const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
-    rightLeg.position.set(0.15, 0.4, 0);
-    rightLeg.castShadow = true;
-    playerGroup.add(rightLeg);
-    
-    playerGroup.position.set(0, 0, 0);
-    return playerGroup;
+    loader.load('public/models/glb/soccerAnimationsPack1.glb', (gltf) => {
+        const model = gltf.scene;
+        
+        // Enable shadows on all meshes
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        });
+        
+        // Create animation mixer
+        const mixer = new THREE.AnimationMixer(model);
+        const clips = gltf.animations;
+        
+        // Find and play idle animation
+        const idleClip = THREE.AnimationClip.findByName(clips, 'Idle');
+        if (idleClip) {
+            const action = mixer.clipAction(idleClip);
+            action.play();
+        }
+        
+        // Store mixer in userData for animation updates
+        model.userData.mixer = mixer;
+        model.userData.animations = clips;
+        
+        // Set initial position
+        model.position.set(0, 0, 0);
+
+        // Scale the model
+        model.scale.set(1.1, 1.1, 1.1);
+        
+        // Return the model and mixer via callback
+        if (onLoaded) {
+            onLoaded(model, mixer);
+        }
+    }, undefined, (error) => {
+        console.error('Error loading player model:', error);
+    });
 }
-

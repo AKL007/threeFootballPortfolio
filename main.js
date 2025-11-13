@@ -37,19 +37,24 @@ setupLighting(scene);
 const stadium = createStadium();
 scene.add(stadium);
 
-const player = createPlayer();
-scene.add(player);
+let player = null;
+let playerMixer = null;
+
+createPlayer((model, mixer) => {
+    player = model;
+    playerMixer = mixer;
+    scene.add(player);
+});
 
 const ball = createBall();
 scene.add(ball);
 
 // Camera setup
-camera.position.set(0, 90, 20);
+camera.position.set(0, 90, -20);
 camera.lookAt(0,0,0);
 
-// Setup controls
-setupMouseControls(renderer, player);
-setupKeyboardControls(player, camera);
+// Setup controls (will be set up after player loads)
+let controlsSetup = false;
 
 // Animation loop
 let lastTime = performance.now();
@@ -75,10 +80,26 @@ function animate() {
         stadium.userData.tifo.update(delta);
     }
     
-    updatePlayerMovement(delta, player, ball);
+    // Update player animation mixer
+    if (playerMixer) {
+        playerMixer.update(delta);
+    }
+    
+    // Only update player-related systems if player is loaded
+    if (player) {
+        // Setup controls on first frame after player loads
+        if (!controlsSetup) {
+            setupMouseControls(renderer, player);
+            setupKeyboardControls(player, camera);
+            controlsSetup = true;
+        }
+        
+        updatePlayerMovement(delta, player, ball);
+        updateCamera(delta, camera, player);
+        updateUI(player);
+    }
+    
     updateBall(delta, ball);
-    updateCamera(delta, camera, player);
-    updateUI(player);
     
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
