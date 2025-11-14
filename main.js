@@ -14,7 +14,7 @@ import { updateGrass } from './models/grass.js';
 
 // Controls
 import { setupMouseControls } from './controls/mouse.js';
-import { setupKeyboardControls } from './controls/keyboard.js';
+import { setupKeyboardControls, setBallReference } from './controls/keyboard.js';
 
 // Game logic
 import { updatePlayerMovement } from './game/playerMovement.js';
@@ -48,6 +48,7 @@ createPlayer((model, mixer) => {
 
 const ball = createBall();
 scene.add(ball);
+setBallReference(ball); // Set ball reference for reset functionality
 
 // Camera setup
 camera.position.set(0, 90, -20);

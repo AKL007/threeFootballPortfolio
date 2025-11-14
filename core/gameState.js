@@ -16,6 +16,9 @@ export const gameState = {
     flyMode: false,
     flyCameraVelocity: new THREE.Vector3(),
     flyCameraEuler: new THREE.Euler(0, 0, 0, 'YXZ'),
-    currentLookAt: null
+    currentLookAt: null,
+    actionPower: 0, // Power level for pass/shoot/lob (0-1)
+    isChargingAction: false,
+    currentActionType: null // 'pass', 'through', 'lob', 'shoot'
 };
 

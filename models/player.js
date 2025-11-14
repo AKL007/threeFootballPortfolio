@@ -33,7 +33,7 @@ export function createPlayer(onLoaded) {
         // Set initial position
         model.position.set(0, 0, 0);
 
-        // Scale the model
+        // Scale the model to more realistic proportions
         model.scale.set(1.1, 1.1, 1.1);
         
         // Return the model and mixer via callback

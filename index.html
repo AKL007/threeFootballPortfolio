@@ -30,6 +30,39 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
 
+        #power-bar-container {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 30px;
+            background: rgba(0,0,0,0.7);
+            border: 2px solid white;
+            border-radius: 15px;
+            display: none;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        #power-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #ffff00, #ff0000);
+            width: 0%;
+            transition: width 0.05s linear;
+        }
+
+        #power-bar-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            font-size: 12px;
+        }
+
         #instructions {
             position: fixed;
             bottom: 20px;
@@ -97,6 +130,11 @@
         Mouse: Look around<br>
         Enter: Interact (near penalty spot, dugout, scoreboard)<br>
         Space: Shoot (in penalty mode)
+    </div>
+
+    <div id="power-bar-container">
+        <div id="power-bar"></div>
+        <div id="power-bar-label">Power</div>
     </div>
 
     <div id="modal">

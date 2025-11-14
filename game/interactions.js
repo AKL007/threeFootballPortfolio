@@ -8,8 +8,8 @@ export function checkInteractions(player, camera) {
     const interactionDistance = 5;
     
     // Check penalty spot
-    const penaltySpot1 = new THREE.Vector3(-11, 0, 0);
-    const penaltySpot2 = new THREE.Vector3(11, 0, 0);
+    const penaltySpot1 = new THREE.Vector3(-43, 0, 0);
+    const penaltySpot2 = new THREE.Vector3(43, 0, 0);
     
     if (playerPos.distanceTo(penaltySpot1) < interactionDistance || 
         playerPos.distanceTo(penaltySpot2) < interactionDistance) {

@@ -3,6 +3,13 @@ import { checkInteractions } from '../game/interactions.js';
 import { startPenaltyMode, shootPenalty } from '../game/penalty.js';
 import { exitZoomMode } from '../camera/cameraController.js';
 import { closeModal } from '../ui/modal.js';
+import { resetGameState } from '../game/reset.js';
+
+let ball = null; // Will be set when ball is created
+
+export function setBallReference(ballRef) {
+    ball = ballRef;
+}
 
 export function setupKeyboardControls(player, camera) {
     document.addEventListener('keydown', (event) => {
@@ -27,6 +34,13 @@ export function setupKeyboardControls(player, camera) {
             checkInteractions(player, camera);
         }
         
+        // Reset game state with 'R' key
+        if (event.code === 'KeyR' && !event.repeat && !gameState.flyMode) {
+            if (ball) {
+                resetGameState(player, ball);
+            }
+        }
+        
         if (event.code === 'Escape') {
             if (gameState.flyMode) {
                 gameState.flyMode = false;
@@ -45,6 +59,20 @@ export function setupKeyboardControls(player, camera) {
 
     document.addEventListener('keyup', (event) => {
         gameState.keys[event.code] = false;
+        
+        // Reset processed flags for action keys
+        if (event.code === 'KeyS') {
+            gameState.keys['KeyS_processed'] = false;
+        }
+        if (event.code === 'KeyW') {
+            gameState.keys['KeyW_processed'] = false;
+        }
+        if (event.code === 'KeyA') {
+            gameState.keys['KeyA_processed'] = false;
+        }
+        if (event.code === 'KeyD') {
+            gameState.keys['KeyD_processed'] = false;
+        }
         
         if (event.code === 'Space' && gameState.penaltyMode && !gameState.flyMode) {
             shootPenalty();
