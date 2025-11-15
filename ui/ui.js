@@ -1,7 +1,8 @@
 import { gameState } from '../core/gameState.js';
+import { GAME } from '../config/game.js';
 
 export function updateUI(player) {
-    const speed = gameState.playerVelocity.length() * 3.6; // Convert to km/h
+    const speed = gameState.playerVelocity.length() * GAME.SPEED_CONVERSION_TO_KMH; // Convert to km/h
     document.getElementById('speed').textContent = speed.toFixed(1);
     document.getElementById('position').textContent = 
         `${player.position.x.toFixed(1)}, ${player.position.z.toFixed(1)}`;

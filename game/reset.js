@@ -1,5 +1,6 @@
 import { gameState } from '../core/gameState.js';
 import { setBallInPossession, resetActionCooldown } from './ballActions.js';
+import { BALL_PHYSICS } from '../config/ballPhysics.js';
 
 export function resetGameState(player, ball) {
     // Reset player position and velocity
@@ -11,7 +12,7 @@ export function resetGameState(player, ball) {
     player.quaternion.set(0, 0, 0, 1);
     
     // Reset ball position (near player) and velocity
-    ball.position.set(0, 0.11, 1); // Slightly in front of player
+    ball.position.set(0, BALL_PHYSICS.GROUND_Y, 1); // Slightly in front of player
     gameState.ballVelocity.set(0, 0, 0);
     
     // Reset ball possession

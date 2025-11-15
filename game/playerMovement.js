@@ -2,6 +2,9 @@ import * as THREE from 'three';
 import { gameState } from '../core/gameState.js';
 import { passBall, throughPass, lobPass, shootBall, isBallInPossession, setBallInPossession, checkBallReturn, updateBallActions } from './ballActions.js';
 import { ANIMATIONS } from './animations.js';
+import { PLAYER_MOVEMENT } from '../config/playerMovement.js';
+import { BALL_PHYSICS } from '../config/ballPhysics.js';
+import { PENALTY } from '../config/penalty.js';
 
 // Animation state management
 let currentAction = null;
@@ -34,7 +37,7 @@ function initializeAnimations(player) {
 }
 
 // Switch to a different animation with smooth transition
-function switchAnimation(animationName, fadeTime = 0.3) {
+function switchAnimation(animationName, fadeTime = PLAYER_MOVEMENT.ANIMATION_FADE_TIME) {
     const newAction = animationActions[animationName];
     
     if (!newAction || newAction === currentAction) {
@@ -84,11 +87,8 @@ function updatePlayerAnimation(player, isMoving, speed, forceAnimation = null) {
     let targetAnimation = ANIMATIONS.IDLE;
     
     if (isMoving) {
-        // Speed thresholds (m/s) - maxSpeed is 6 m/s
-        const JOG_THRESHOLD = 4.5;    // Medium: 0-4.5 m/s (Jog), Fast: 4.5-6 m/s (Run)
-        
         // Select animation based on speed
-        if (speed >= JOG_THRESHOLD) {
+        if (speed >= PLAYER_MOVEMENT.JOG_THRESHOLD) {
             // Fast speed - use running animation
             targetAnimation = ANIMATIONS.RUNNING_FORWARD;
         } else {
@@ -113,9 +113,11 @@ export function updatePlayerMovement(delta, player, ball) {
     updateBallActions(delta);
     
     // Realistic player speed and acceleration
-    const maxSpeed = 6; // m/s - realistic running speed (~21.6 km/h)
-    const acceleration = 4; // m/s² - acceleration rate
-    const deceleration = 8; // m/s² - deceleration rate (faster than acceleration)
+    // Check if Shift is held for sprint
+    const isSprinting = gameState.keys['ShiftLeft'] || gameState.keys['ShiftRight'];
+    const maxSpeed = isSprinting ? PLAYER_MOVEMENT.SPRINT_SPEED : PLAYER_MOVEMENT.MAX_SPEED;
+    const acceleration = PLAYER_MOVEMENT.ACCELERATION;
+    const deceleration = PLAYER_MOVEMENT.DECELERATION;
     
     const direction = new THREE.Vector3();
     let isMoving = false;
@@ -140,8 +142,8 @@ export function updatePlayerMovement(delta, player, ball) {
     
     // Ball actions with power charging
     let actionPerformed = false;
-    const CHARGE_RATE = 2.0; // Power per second
-    const MAX_POWER = 1.0;
+    const CHARGE_RATE = PLAYER_MOVEMENT.CHARGE_RATE;
+    const MAX_POWER = PLAYER_MOVEMENT.MAX_POWER;
     
     // Handle key down - start charging (only if not already charging and ball in possession)
     if (!gameState.isChargingAction && isBallInPossession()) {
@@ -176,7 +178,7 @@ export function updatePlayerMovement(delta, player, ball) {
         
         if (!keyHeld) {
             // Key released - execute action if power is sufficient
-            if (gameState.actionPower > 0.1) {
+            if (gameState.actionPower > PLAYER_MOVEMENT.MIN_POWER_TO_EXECUTE) {
                 let executed = false;
                 if (gameState.currentActionType === 'pass') {
                     executed = passBall(player, ball, gameState.actionPower);
@@ -214,15 +216,15 @@ export function updatePlayerMovement(delta, player, ball) {
     
     if (gameState.penaltyMode) {
         // Penalty mode controls
-        if (gameState.keys['ArrowUp']) gameState.penaltyDirection.y += 0.02;
-        if (gameState.keys['ArrowDown']) gameState.penaltyDirection.y -= 0.02;
-        if (gameState.keys['ArrowLeft']) gameState.penaltyDirection.x -= 0.02;
-        if (gameState.keys['ArrowRight']) gameState.penaltyDirection.x += 0.02;
+        if (gameState.keys['ArrowUp']) gameState.penaltyDirection.y += PENALTY.DIRECTION_STEP;
+        if (gameState.keys['ArrowDown']) gameState.penaltyDirection.y -= PENALTY.DIRECTION_STEP;
+        if (gameState.keys['ArrowLeft']) gameState.penaltyDirection.x -= PENALTY.DIRECTION_STEP;
+        if (gameState.keys['ArrowRight']) gameState.penaltyDirection.x += PENALTY.DIRECTION_STEP;
         
         gameState.penaltyDirection.clampLength(0, 1);
         
         if (gameState.keys['Space']) {
-            gameState.penaltyPower = Math.min(gameState.penaltyPower + delta * 2, 1);
+            gameState.penaltyPower = Math.min(gameState.penaltyPower + delta * PENALTY.POWER_RATE, PENALTY.MAX_POWER);
         }
         
         // Use penalty kick animation
@@ -256,7 +258,7 @@ export function updatePlayerMovement(delta, player, ball) {
         while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
         
         // Smoothly rotate player towards the movement direction
-        const rotationSpeed = 8; // Rotation speed in radians per second
+        const rotationSpeed = PLAYER_MOVEMENT.ROTATION_SPEED;
         const rotationStep = Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), rotationSpeed * delta);
         euler.y += rotationStep;
         
@@ -309,13 +311,17 @@ export function updatePlayerMovement(delta, player, ball) {
     
     // Ball follows player only when in possession
     if (isBallInPossession()) {
-        const ballOffset = new THREE.Vector3(0, 0.2, 1);
+        const ballOffset = new THREE.Vector3(
+            PLAYER_MOVEMENT.BALL_OFFSET.x,
+            PLAYER_MOVEMENT.BALL_OFFSET.y,
+            PLAYER_MOVEMENT.BALL_OFFSET.z
+        );
         ballOffset.applyQuaternion(player.quaternion);
         const targetBallPos = player.position.clone().add(ballOffset);
         
-        ball.position.lerp(targetBallPos, 0.3);
-        ball.rotation.x += delta * 5;
-        ball.rotation.z += delta * 3;
+        ball.position.lerp(targetBallPos, PLAYER_MOVEMENT.BALL_LERP_SPEED);
+        ball.rotation.x += delta * BALL_PHYSICS.ROTATION_SPEED_X;
+        ball.rotation.z += delta * BALL_PHYSICS.ROTATION_SPEED_Z;
     } else {
         // Check if ball should return to player
         checkBallReturn(player, ball);
@@ -323,8 +329,8 @@ export function updatePlayerMovement(delta, player, ball) {
         // Rotate ball based on velocity when in play
         if (gameState.ballVelocity.length() > 0.1) {
             const velocity = gameState.ballVelocity.clone().normalize();
-            ball.rotation.x += velocity.z * delta * 10;
-            ball.rotation.z += velocity.x * delta * 10;
+            ball.rotation.x += velocity.z * delta * BALL_PHYSICS.ROTATION_SPEED_IN_PLAY;
+            ball.rotation.z += velocity.x * delta * BALL_PHYSICS.ROTATION_SPEED_IN_PLAY;
         }
     }
 }

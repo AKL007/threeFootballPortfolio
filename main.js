@@ -4,6 +4,8 @@ import * as THREE from 'three';
 import { createScene, createCamera, createRenderer } from './core/scene.js';
 import { setupLighting } from './core/lighting.js';
 import { gameState } from './core/gameState.js';
+import { GAME } from './config/game.js';
+import './config/index.js'; // Make config available globally for UI play-testing
 
 // Models
 import { createStadium } from './models/stadium.js';
@@ -23,6 +25,7 @@ import { updateCamera } from './camera/cameraController.js';
 
 // UI
 import { updateUI } from './ui/ui.js';
+import './ui/configPanel.js'; // Initialize config panel
 
 // Initialize scene
 const scene = createScene();
@@ -67,8 +70,7 @@ function animate() {
     lastTime = currentTime;
     
     // Clamp delta to prevent physics breaking when tab is hidden
-    const MAX_DELTA = 0.1; // 100ms max
-    delta = Math.min(delta, MAX_DELTA);
+    delta = Math.min(delta, GAME.MAX_DELTA);
     
     // Update grass animation
     grassTime += delta;
