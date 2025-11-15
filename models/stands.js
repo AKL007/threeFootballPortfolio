@@ -1,3 +1,5 @@
+// TODO: change from Math.atan to Math.atan2 (check other files as well)
+
 import * as THREE from 'three';
 
 /**

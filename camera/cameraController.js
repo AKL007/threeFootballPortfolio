@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { gameState } from '../core/gameState.js';
+import { CAMERA } from '../config/camera.js';
 
 // Easing function for smooth zoom
 function easeInOutCubic(t) {
@@ -13,8 +14,8 @@ export function startZoomMode(targetPos, lookAtPos, callback, camera, player) {
     
     // Calculate target camera position (closer to the object)
     const direction = new THREE.Vector3().subVectors(lookAtPos, targetPos).normalize();
-    const targetCameraPos = lookAtPos.clone().add(direction.multiplyScalar(-8));
-    targetCameraPos.y += 2;
+    const targetCameraPos = lookAtPos.clone().add(direction.multiplyScalar(CAMERA.ZOOM.DISTANCE));
+    targetCameraPos.y += CAMERA.ZOOM.HEIGHT_OFFSET;
     
     gameState.zoomTarget = { 
         pos: targetPos, 
@@ -37,9 +38,9 @@ export function exitZoomMode() {
 export function updateFlyCamera(delta, camera) {
     if (!gameState.flyMode) return;
     
-    const speed = 100; // Movement speed
-    const acceleration = 400; // Acceleration rate
-    const damping = 0.85; // Velocity damping
+    const speed = CAMERA.FLY.SPEED;
+    const acceleration = CAMERA.FLY.ACCELERATION;
+    const damping = CAMERA.FLY.DAMPING;
     
     // Reset velocity
     gameState.flyCameraVelocity.multiplyScalar(damping);
@@ -103,7 +104,7 @@ export function updateCamera(delta, camera, player) {
     
     if (gameState.zoomMode && gameState.zoomTarget) {
         // Smooth zoom animation
-        gameState.zoomTarget.zoomProgress = Math.min(gameState.zoomTarget.zoomProgress + delta * 2, 1);
+        gameState.zoomTarget.zoomProgress = Math.min(gameState.zoomTarget.zoomProgress + delta * CAMERA.ZOOM.SPEED, 1);
         const easeProgress = easeInOutCubic(gameState.zoomTarget.zoomProgress);
         
         // Interpolate camera position from original to target
@@ -125,19 +126,19 @@ export function updateCamera(delta, camera, player) {
     
     if (gameState.penaltyMode) {
         // Fixed camera for penalty
-        const goalPos = player.position.z > 0 ? new THREE.Vector3(50, 5, 0) : new THREE.Vector3(-50, 5, 0);
-        camera.position.lerp(goalPos, 0.1);
+        const goalX = player.position.z > 0 ? CAMERA.PENALTY.GOAL_OFFSET_X : -CAMERA.PENALTY.GOAL_OFFSET_X;
+        const goalPos = new THREE.Vector3(goalX, CAMERA.PENALTY.GOAL_OFFSET_Y, 0);
+        camera.position.lerp(goalPos, CAMERA.PENALTY.LERP_SPEED);
         camera.lookAt(player.position);
         return;
     }
     
     // FIFA-style fixed camera: fixed angle, follows player position but doesn't rotate with player
     // Camera positioned behind and above player, looking down at an angle
-    const fixedOffset = new THREE.Vector3(0, 25, 30); // Behind (positive Z) and above player
-    const targetPos = player.position.clone().add(fixedOffset);
+    const targetPos = player.position.clone().add(CAMERA.FOLLOW.FIXED_OFFSET);
     
     // Smoothly follow player position
-    camera.position.lerp(targetPos, 0.1);
+    camera.position.lerp(targetPos, CAMERA.FOLLOW.LERP_SPEED);
     
     // Always look at player position
     const targetLookAt = player.position.clone();
@@ -148,7 +149,7 @@ export function updateCamera(delta, camera, player) {
     }
     
     // Smoothly interpolate look-at target to prevent warping
-    gameState.currentLookAt.lerp(targetLookAt, 0.15);
+    gameState.currentLookAt.lerp(targetLookAt, CAMERA.FOLLOW.LOOK_AT_LERP_SPEED);
     camera.lookAt(gameState.currentLookAt);
 }
 

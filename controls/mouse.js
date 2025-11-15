@@ -1,4 +1,5 @@
 import { gameState } from '../core/gameState.js';
+import { CAMERA } from '../config/camera.js';
 
 export function setupMouseControls(renderer, player) {
     let isPointerLocked = false;
@@ -14,16 +15,13 @@ export function setupMouseControls(renderer, player) {
     document.addEventListener('mousemove', (event) => {
         if (!isPointerLocked) return;
         
-        const sensitivity = 0.002;
-        
         if (gameState.flyMode) {
             // Fly camera rotation
-            gameState.flyCameraEuler.y -= event.movementX * sensitivity;
-            gameState.flyCameraEuler.x -= event.movementY * sensitivity;
+            gameState.flyCameraEuler.y -= event.movementX * CAMERA.MOUSE.SENSITIVITY;
+            gameState.flyCameraEuler.x -= event.movementY * CAMERA.MOUSE.SENSITIVITY;
             
             // Clamp pitch to prevent gimbal lock
-            const maxPitch = Math.PI / 2 - 0.1;
-            gameState.flyCameraEuler.x = Math.max(-maxPitch, Math.min(maxPitch, gameState.flyCameraEuler.x));
+            gameState.flyCameraEuler.x = Math.max(-CAMERA.FLY.MAX_PITCH, Math.min(CAMERA.FLY.MAX_PITCH, gameState.flyCameraEuler.x));
         } else {
             // FIFA-style fixed camera: mouse rotation disabled
             // Player rotation is controlled by movement direction only

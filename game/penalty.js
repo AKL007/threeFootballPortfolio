@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { gameState } from '../core/gameState.js';
+import { PENALTY } from '../config/penalty.js';
 
 export function startPenaltyMode() {
     gameState.penaltyMode = true;
@@ -14,11 +15,11 @@ export function shootPenalty() {
     
     const shootDirection = new THREE.Vector3(
         gameState.penaltyDirection.x,
-        0.3,
-        -1 + gameState.penaltyDirection.y
+        PENALTY.SHOOT_DIRECTION_Y,
+        PENALTY.SHOOT_DIRECTION_Z_BASE + gameState.penaltyDirection.y
     ).normalize();
     
-    const shootPower = gameState.penaltyPower * 30;
+    const shootPower = gameState.penaltyPower * PENALTY.SHOOT_POWER_MULTIPLIER;
     gameState.ballVelocity = shootDirection.multiplyScalar(shootPower);
     
     gameState.penaltyMode = false;
