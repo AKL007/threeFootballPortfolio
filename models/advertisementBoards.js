@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { AD_BOARD_COLORS } from '../config/colors.js';
 
 /**
  * Creates a single advertisement board as a box mesh.
@@ -11,7 +12,7 @@ import * as THREE from 'three';
 export function createAdvertisementBoard(x, z, rotationY, length) {
     const board = new THREE.Mesh(
         new THREE.BoxGeometry(length, 2, 0.1),
-        new THREE.MeshLambertMaterial({ color: 0xda020e, flatShading: true })
+        new THREE.MeshLambertMaterial({ color: AD_BOARD_COLORS.BOARD, flatShading: true })
     );
     board.position.set(x, 0, z);
     board.rotateOnAxis(new THREE.Vector3(0, 1, 0), rotationY);

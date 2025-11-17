@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { DUGOUT_COLORS } from '../config/colors.js';
 
 /**
  * Creates a dugout (for 'Analytics') with iPad displays.
@@ -11,7 +12,7 @@ export function createDugout() {
     dugoutGroup.userData = { type: 'analytics' };
 
     // Dugout positions: one for each side of halfway line
-    const dugoutZ = 45;
+    const dugoutZ = 39.5;
     const dugoutY = 0.1;
 
     // Helper: create a simple bench
@@ -21,7 +22,7 @@ export function createDugout() {
         // Bench base (seat)
         const seat = new THREE.Mesh(
             new THREE.BoxGeometry(5, 0.3, 0.7),
-            new THREE.MeshLambertMaterial({ color: 0x222222, flatShading: true })
+            new THREE.MeshLambertMaterial({ color: DUGOUT_COLORS.BENCH, flatShading: true })
         );
         seat.position.set(0, 0.2, 0);
         benchGroup.add(seat);
@@ -29,7 +30,7 @@ export function createDugout() {
         // Bench back
         const back = new THREE.Mesh(
             new THREE.BoxGeometry(5, 0.6, 0.2),
-            new THREE.MeshLambertMaterial({ color: 0x222222, flatShading: true })
+            new THREE.MeshLambertMaterial({ color: DUGOUT_COLORS.BENCH, flatShading: true })
         );
         back.position.set(0, 0.65, -0.25);
         benchGroup.add(back);
@@ -39,7 +40,7 @@ export function createDugout() {
             for (let z of [0.28, -0.28]) {
                 const leg = new THREE.Mesh(
                     new THREE.CylinderGeometry(0.08, 0.08, 0.5, 8),
-                    new THREE.MeshLambertMaterial({ color: 0x3e2723, flatShading: true })
+                    new THREE.MeshLambertMaterial({ color: DUGOUT_COLORS.BENCH_LEGS, flatShading: true })
                 );
                 leg.position.set(x, 0.04, z);
                 benchGroup.add(leg);
@@ -50,7 +51,7 @@ export function createDugout() {
         const canopyGroup = new THREE.Group();
 
         // Canopy supports (vertical posts)
-        const postMaterial = new THREE.MeshLambertMaterial({ color: 0x000000, flatShading: true });
+        const postMaterial = new THREE.MeshLambertMaterial({ color: DUGOUT_COLORS.POSTS, flatShading: true });
         const postHeight = 2;
         const postY = 0.8;
         const postZFront = 0.42;
@@ -107,7 +108,7 @@ export function createDugout() {
         // Glass canopy sheet (slight slope)
         // Transparent, light-blue-tinted glass
         const glassMat = new THREE.MeshPhysicalMaterial({
-            color: 0x9cd6f7,
+            color: DUGOUT_COLORS.GLASS,
             transmission: 0.85,
             transparent: true,
             opacity: 0.55,
@@ -134,7 +135,7 @@ export function createDugout() {
     }
 
     // Helper: create a water bottle
-    function createWaterBottle(color = 0x1C8ADB) {
+    function createWaterBottle(color = DUGOUT_COLORS.WATER_BOTTLE_DEFAULT) {
         const bottle = new THREE.Group();
         const body = new THREE.Mesh(
             new THREE.CylinderGeometry(0.09, 0.11, 0.38, 12),
@@ -145,7 +146,7 @@ export function createDugout() {
 
         const cap = new THREE.Mesh(
             new THREE.CylinderGeometry(0.07, 0.07, 0.06, 12),
-            new THREE.MeshLambertMaterial({ color: 0x0d2046, flatShading: true })
+            new THREE.MeshLambertMaterial({ color: DUGOUT_COLORS.WATER_BOTTLE_CAP, flatShading: true })
         );
         cap.position.y = 0.39;
         bottle.add(cap);
@@ -156,13 +157,13 @@ export function createDugout() {
     function createCrate() {
         const crate = new THREE.Mesh(
             new THREE.BoxGeometry(0.75, 0.45, 0.55),
-            new THREE.MeshLambertMaterial({ color: 0x4d2600, flatShading: true })
+            new THREE.MeshLambertMaterial({ color: DUGOUT_COLORS.CRATE, flatShading: true })
         );
         // Optionally add some stripes to look like a gatorade/ice crate:
         // for simplicity, just a colored "lid"
         const lid = new THREE.Mesh(
             new THREE.BoxGeometry(0.75, 0.05, 0.55),
-            new THREE.MeshLambertMaterial({ color: 0xef652a, flatShading: true })
+            new THREE.MeshLambertMaterial({ color: DUGOUT_COLORS.CRATE_LID, flatShading: true })
         );
         lid.position.y = 0.25;
         crate.add(lid);
@@ -180,11 +181,11 @@ export function createDugout() {
         const ctx = canvas.getContext('2d');
 
         // Draw whiteboard base
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = DUGOUT_COLORS.TACTICS_BOARD_BG;
         ctx.fillRect(0, 0, width, height);
 
         // Draw black border
-        ctx.strokeStyle = '#222222';
+        ctx.strokeStyle = DUGOUT_COLORS.TACTICS_BOARD_BORDER;
         ctx.lineWidth = 8;
         ctx.strokeRect(0, 0, width, height);
 
@@ -192,12 +193,12 @@ export function createDugout() {
         ctx.save();
         ctx.translate(width / 2, height / 2);
         const pitchW = 0.95 * width, pitchH = 0.91 * height;
-        ctx.strokeStyle = "#34a853";
+        ctx.strokeStyle = DUGOUT_COLORS.TACTICS_BOARD_PITCH;
         ctx.lineWidth = 5;
         ctx.strokeRect(-pitchW/2, -pitchH/2, pitchW, pitchH);
 
         // Center line
-        ctx.strokeStyle = "#228b22";
+        ctx.strokeStyle = DUGOUT_COLORS.TACTICS_BOARD_CENTER_LINE;
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.moveTo(0, -pitchH/2);
@@ -215,7 +216,7 @@ export function createDugout() {
         ctx.strokeRect(pitchW/2-pitchW*0.13, -pitchH*0.21, pitchW*0.13, pitchH*0.42);
 
         // Left goal
-        ctx.strokeStyle = "#333333";
+        ctx.strokeStyle = DUGOUT_COLORS.TACTICS_BOARD_GOAL;
         ctx.strokeRect(-pitchW/2-8, -pitchH*0.08, 8, pitchH*0.16);
         // Right goal
         ctx.strokeRect(pitchW/2, -pitchH*0.08, 8, pitchH*0.16);
@@ -229,12 +230,12 @@ export function createDugout() {
             [0.40,0.24],[0.40,0.5],[0.40,0.76], // 3 mids (LM, CM, RM)
             [0.58,0.18],[0.66,0.5],[0.58,0.82] // Front three (LW, ST, RW)
         ];
-        ctx.fillStyle = '#215eef';
+        ctx.fillStyle = DUGOUT_COLORS.TACTICS_BOARD_HOME;
         home.forEach(pos => {
             ctx.beginPath();
             ctx.arc(pos[0]*width, pos[1]*height, width*0.025, 0, Math.PI*2);
             ctx.fill();
-            ctx.strokeStyle = "#ffffff";
+            ctx.strokeStyle = DUGOUT_COLORS.TACTICS_BOARD_STROKE;
             ctx.lineWidth = 3;
             ctx.stroke();
         });
@@ -246,12 +247,12 @@ export function createDugout() {
             [0.74, 0.12], [0.74, 0.29], [0.74, 0.5], [0.74, 0.71], [0.74, 0.88], // 5 Midfielders
             [0.63, 0.33], [0.63, 0.67] // 2 Forwards
         ];
-        ctx.fillStyle = '#ee4135';
+        ctx.fillStyle = DUGOUT_COLORS.TACTICS_BOARD_AWAY;
         away.forEach(pos => {
             ctx.beginPath();
             ctx.arc(pos[0]*width, pos[1]*height, width*0.025, 0, Math.PI*2);
             ctx.fill();
-            ctx.strokeStyle = "#fff";
+            ctx.strokeStyle = DUGOUT_COLORS.TACTICS_BOARD_STROKE;
             ctx.lineWidth = 3;
             ctx.stroke();
         });
@@ -283,9 +284,9 @@ export function createDugout() {
             ctx.restore();
         }
         // Example arrows: mids making runs
-        drawArrow([0.40,0.24],[0.58,0.18],"#215eef");
-        drawArrow([0.40,0.5],[0.66,0.5],"#215eef");
-        drawArrow([0.40,0.76],[0.58,0.82],"#215eef");
+        drawArrow([0.40,0.24],[0.58,0.18], DUGOUT_COLORS.TACTICS_BOARD_HOME);
+        drawArrow([0.40,0.5],[0.66,0.5], DUGOUT_COLORS.TACTICS_BOARD_HOME);
+        drawArrow([0.40,0.76],[0.58,0.82], DUGOUT_COLORS.TACTICS_BOARD_HOME);
         // drawArrow([0.58,0.18],[0.66,0.5],"#ee4135");
         // drawArrow([0.58,0.82],[0.66,0.5],"#ee4135");
 
@@ -298,7 +299,7 @@ export function createDugout() {
             new THREE.MeshLambertMaterial({ 
                 map: texture,
                 flatShading: true,
-                color: 0xffffff,
+                color: DUGOUT_COLORS.TACTICS_BOARD_BG,
                 // Increased reflectivity or gloss if desired:
                 reflectivity: 0.18 
             })
@@ -320,7 +321,7 @@ export function createDugout() {
 
     // Place water bottles by the bench
     for (let i = 0; i < 4; i++) {
-        const bottle = createWaterBottle(i === 2 ? 0xE83E0B : 0x1C8ADB);
+        const bottle = createWaterBottle(i === 2 ? DUGOUT_COLORS.WATER_BOTTLE_ORANGE : DUGOUT_COLORS.WATER_BOTTLE_DEFAULT);
         bottle.position.set(-2 + i*1.3, -0.1, 0.53 + (i%2)*0.13);
         leftDugoutGroup.add(bottle);
     }
@@ -339,7 +340,7 @@ export function createDugout() {
     // Substitutes' backpack (simple)
     const backpack = new THREE.Mesh(
         new THREE.BoxGeometry(0.35, 0.45, 0.22),
-        new THREE.MeshLambertMaterial({ color: 0x25435b, flatShading: true })
+        new THREE.MeshLambertMaterial({ color: DUGOUT_COLORS.BACKPACK, flatShading: true })
     );
     backpack.position.set(-2.5, 0.29, -0.75);
     leftDugoutGroup.add(backpack);
@@ -354,7 +355,7 @@ export function createDugout() {
 
     // Water bottles
     for (let i = 0; i < 3; i++) {
-        const bottle = createWaterBottle(i === 1 ? 0xFFD600 : 0x098f13);
+        const bottle = createWaterBottle(i === 1 ? DUGOUT_COLORS.WATER_BOTTLE_YELLOW : DUGOUT_COLORS.WATER_BOTTLE_GREEN);
         bottle.position.set(-2 + i*2, -0.1, 0.63 - (i%2)*0.11);
         rightDugoutGroup.add(bottle);
     }
@@ -374,7 +375,7 @@ export function createDugout() {
     for (let i = 0; i < 3; i++) {
         const ball = new THREE.Mesh(
             new THREE.SphereGeometry(0.18, 16, 10),
-            new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true })
+            new THREE.MeshLambertMaterial({ color: DUGOUT_COLORS.FOOTBALL, flatShading: true })
         );
         ball.position.set(0.55 + 0.45*(i-1) + Math.random() * 0.2, 0.10, +1.9 + ((i%2)*0.18));
         rightDugoutGroup.add(ball);

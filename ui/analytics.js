@@ -1,14 +1,16 @@
+import { ANALYTICS_COLORS } from '../config/colors.js';
+
 export function drawXGMap() {
     const canvas = document.getElementById('xgCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     
     // Draw field
-    ctx.fillStyle = '#2d5016';
+    ctx.fillStyle = ANALYTICS_COLORS.FIELD;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // Draw goal
-    ctx.strokeStyle = '#ffffff';
+    ctx.strokeStyle = ANALYTICS_COLORS.GOAL_STROKE;
     ctx.lineWidth = 2;
     ctx.strokeRect(canvas.width * 0.1, canvas.height * 0.2, canvas.width * 0.8, canvas.height * 0.6);
     
@@ -22,7 +24,10 @@ export function drawXGMap() {
     
     zones.forEach(zone => {
         const alpha = zone.xg;
-        ctx.fillStyle = `rgba(255, ${255 * (1 - alpha)}, 0, ${alpha})`;
+        // Interpolate between yellow (low xG) and red (high xG)
+        const red = 255;
+        const green = 255 * (1 - alpha);
+        ctx.fillStyle = `rgba(${red}, ${green}, 0, ${alpha})`;
         ctx.beginPath();
         ctx.arc(
             zone.x * canvas.width,
@@ -41,7 +46,7 @@ export function drawPossessionArea() {
     const ctx = canvas.getContext('2d');
     
     // Draw field
-    ctx.fillStyle = '#2d5016';
+    ctx.fillStyle = ANALYTICS_COLORS.FIELD;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // Draw possession zones
@@ -51,7 +56,7 @@ export function drawPossessionArea() {
     ];
     
     zones.forEach(zone => {
-        ctx.fillStyle = `rgba(0, 150, 255, ${zone.possession})`;
+        ctx.fillStyle = ANALYTICS_COLORS.POSSESSION.replace('1)', `${zone.possession})`);
         ctx.fillRect(
             zone.x * canvas.width,
             zone.y * canvas.height,
@@ -67,11 +72,11 @@ export function drawBallTrajectory() {
     const ctx = canvas.getContext('2d');
     
     // Draw field
-    ctx.fillStyle = '#2d5016';
+    ctx.fillStyle = ANALYTICS_COLORS.FIELD;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // Draw trajectory
-    ctx.strokeStyle = '#ffff00';
+    ctx.strokeStyle = ANALYTICS_COLORS.TRAJECTORY;
     ctx.lineWidth = 2;
     ctx.beginPath();
     
@@ -90,7 +95,7 @@ export function drawBallTrajectory() {
     ctx.stroke();
     
     // Draw ball at end
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = ANALYTICS_COLORS.BALL;
     ctx.beginPath();
     ctx.arc(0.8 * canvas.width, 0.5 * canvas.height, 5, 0, Math.PI * 2);
     ctx.fill();

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { createLine } from './fieldMarkings.js';
+import { GOAL_COLORS, FIELD_MARKINGS_COLORS } from '../config/colors.js';
 
 /**
  * Creates a soccer goal with posts, crossbar, and net wireframe.
@@ -16,14 +17,18 @@ export function createGoal(x, z) {
     const goalDepth = 1.5;
 
     // Materials
-    const postMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true });
+    const postMaterial = new THREE.MeshStandardMaterial({ 
+        color: GOAL_COLORS.POST,
+        roughness: 0.4,
+        metalness: 0.8
+    });
     const netMaterial = new THREE.MeshBasicMaterial({
-        color: 0xbbbbbb,
+        color: GOAL_COLORS.NET,
         wireframe: true,
         side: THREE.DoubleSide,
         flatShading: true
     });
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+    const lineMaterial = new THREE.LineBasicMaterial({ color: FIELD_MARKINGS_COLORS.WHITE });
 
     // Posts (left/right)
     const postGeometry = new THREE.BoxGeometry(0.1, goalHeight, 0.1);

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createGrassField } from './grass.js';
+import { createGrassField, createExtendedGrassArea } from './grass.js';
 import { createFieldMarkings, createPenaltyArea } from './fieldMarkings.js';
 import { createGoal } from './goals.js';
 import { createAllAdvertisementBoards } from './advertisementBoards.js';
@@ -7,31 +7,42 @@ import { createAllStands } from './stands.js';
 import { createTifo } from './tifo.js';
 import { createScoreboard } from './scoreboard.js';
 import { createDugout } from './dugout.js';
+import { createTreeCluster } from './trees.js';
+import { STADIUM_COLORS } from '../config/colors.js';
 
 /**
  * Creates and returns a fully decorated 3D stadium for use with Three.js.
+ * @param {THREE.Object3D} helperParent - Optional parent for light helpers (should be scene or untransformed group)
  */
-export function createStadium() {
+export function createStadium(helperParent = null) {
     const stadiumGroup = new THREE.Group();
 
     // ----- Ground Plane -----
     // Large flat ground plane on which everything sits.
-    const stadiumWidth = 2000;
-    const stadiumDepth = 1400;
+    const stadiumWidth = 1000;
+    const stadiumDepth = 1000;
     const ground = new THREE.Mesh(
         new THREE.PlaneGeometry(stadiumWidth, stadiumDepth),
-        new THREE.MeshLambertMaterial({ color: 0x555555, flatShading: true })
+        new THREE.MeshStandardMaterial({ 
+            color: STADIUM_COLORS.GROUND,
+            roughness: 0.8,
+            metalness: 0.0
+        })
     );
     ground.rotation.x = -Math.PI / 2;
     ground.position.set(0, -0.05, 0);
     ground.receiveShadow = true;
     stadiumGroup.add(ground);
 
-    // ----- Grass Field -----
-    // Realistic grass field (imported/shader-based).
+    // ----- Extended Grass Area (under stands) -----
     const fieldWidth = 110;
     const fieldHeight = 70;
-    const grassField = createGrassField(fieldWidth, fieldHeight);
+    const extendedGrass = createExtendedGrassArea(fieldWidth, fieldHeight, 10);
+    stadiumGroup.add(extendedGrass);
+
+    // ----- Grass Field -----
+    // Realistic grass field (imported/shader-based).
+    const grassField = createGrassField(fieldWidth, fieldHeight, 'instanced', {density: 400});
     stadiumGroup.add(grassField);
     stadiumGroup.userData.grassField = grassField; // Reference for animation.
 
@@ -50,7 +61,7 @@ export function createStadium() {
     stadiumGroup.add(createAllAdvertisementBoards());
 
     // ----- Stadium Stands (Bleachers) -----
-    stadiumGroup.add(createAllStands(20));
+    stadiumGroup.add(createAllStands(20, helperParent));
 
     // ----- TIFO Area (for 'Resume') -----
     const tifo = createTifo();
@@ -63,6 +74,26 @@ export function createStadium() {
 
     // ----- Dugout (for 'Analytics') with iPad displays -----
     stadiumGroup.add(createDugout());
+
+    // ----- Trees in Corner Areas -----
+    // Add trees in three corners (excluding northeast corner where scoreboard is)
+    // Northwest corner
+    // stadiumGroup.add(createTreeCluster(-70, 50, 6, 10));
+    // // Southwest corner
+    // stadiumGroup.add(createTreeCluster(-70, -50, 6, 10));
+    // // Southeast corner
+    // stadiumGroup.add(createTreeCluster(70, 50, 6, 10));
+    // Northeast corner (where scoreboard is) - skipped
+
+    // ----- Trees behind the stands all along the sides -----
+    for (let i = -95; i < 105; i+=10) {
+        stadiumGroup.add(createTreeCluster(i, -85 , 10, 20));
+        stadiumGroup.add(createTreeCluster(i, 85, 10, 20));
+    }
+    for (let i = -75; i < 75; i+=10) {
+        stadiumGroup.add(createTreeCluster(-105, i, 10, 20));
+    stadiumGroup.add(createTreeCluster(105, i, 10, 20));
+    }
 
     return stadiumGroup;
 }

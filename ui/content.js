@@ -1,5 +1,6 @@
 import { showModal } from './modal.js';
 import { drawXGMap, drawPossessionArea, drawBallTrajectory } from './analytics.js';
+import { UI_COLORS } from '../config/colors.js';
 
 export function showResume() {
     const resumeContent = `
@@ -29,17 +30,17 @@ export function showProjects() {
     const projectsContent = `
         <h1>Projects</h1>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
-            <div style="background: #2a2a2a; padding: 20px; border-radius: 8px;">
+            <div style="background: ${UI_COLORS.CARD_BG}; padding: 20px; border-radius: 8px;">
                 <h3>Project 1</h3>
                 <p>Description of your first project. This could be a web application, game, or any other project you've worked on.</p>
                 <p><strong>Tech Stack:</strong> React, Node.js, MongoDB</p>
             </div>
-            <div style="background: #2a2a2a; padding: 20px; border-radius: 8px;">
+            <div style="background: ${UI_COLORS.CARD_BG}; padding: 20px; border-radius: 8px;">
                 <h3>Project 2</h3>
                 <p>Description of your second project. Showcase your skills and achievements here.</p>
                 <p><strong>Tech Stack:</strong> Three.js, WebGL, GLSL</p>
             </div>
-            <div style="background: #2a2a2a; padding: 20px; border-radius: 8px;">
+            <div style="background: ${UI_COLORS.CARD_BG}; padding: 20px; border-radius: 8px;">
                 <h3>Project 3</h3>
                 <p>Description of your third project. Highlight what makes it special.</p>
                 <p><strong>Tech Stack:</strong> Python, Django, PostgreSQL</p>
@@ -53,17 +54,17 @@ export function showAnalytics() {
     const analyticsContent = `
         <h1>Analytics Dashboard</h1>
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px;">
-            <div style="background: #2a2a2a; padding: 20px; border-radius: 8px;">
+            <div style="background: ${UI_COLORS.CARD_BG}; padding: 20px; border-radius: 8px;">
                 <h3>xG Map</h3>
-                <canvas id="xgCanvas" width="300" height="200" style="background: #1a1a1a; border-radius: 4px; width: 100%;"></canvas>
+                <canvas id="xgCanvas" width="300" height="200" style="background: ${UI_COLORS.CANVAS_BG}; border-radius: 4px; width: 100%;"></canvas>
             </div>
-            <div style="background: #2a2a2a; padding: 20px; border-radius: 8px;">
+            <div style="background: ${UI_COLORS.CARD_BG}; padding: 20px; border-radius: 8px;">
                 <h3>Possession Area</h3>
-                <canvas id="possessionCanvas" width="300" height="200" style="background: #1a1a1a; border-radius: 4px; width: 100%;"></canvas>
+                <canvas id="possessionCanvas" width="300" height="200" style="background: ${UI_COLORS.CANVAS_BG}; border-radius: 4px; width: 100%;"></canvas>
             </div>
-            <div style="background: #2a2a2a; padding: 20px; border-radius: 8px;">
+            <div style="background: ${UI_COLORS.CARD_BG}; padding: 20px; border-radius: 8px;">
                 <h3>Ball Trajectory</h3>
-                <canvas id="trajectoryCanvas" width="300" height="200" style="background: #1a1a1a; border-radius: 4px; width: 100%;"></canvas>
+                <canvas id="trajectoryCanvas" width="300" height="200" style="background: ${UI_COLORS.CANVAS_BG}; border-radius: 4px; width: 100%;"></canvas>
             </div>
         </div>
     `;

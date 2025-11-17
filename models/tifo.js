@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { TIFO_COLORS } from '../config/colors.js';
 
 /**
  * Creates a TIFO banner (for 'Resume') with interactive cloth-like physics.
@@ -21,7 +22,7 @@ export function createTifo() {
 
     // Helper to draw default background
     function drawDefault(ctx) {
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = TIFO_COLORS.BACKGROUND;
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         ctx.font = 'bold 80px Arial';
         ctx.textAlign = 'center';
@@ -105,7 +106,7 @@ export function createTifo() {
         flatShading: true
     });
     const tifoMesh = new THREE.Mesh(tifoGeometry, tifoMaterial);
-    tifoMesh.position.set(0, 14.6, -55);
+    tifoMesh.position.set(0, 14.6, -50);
     tifoMesh.userData = { type: 'resume' };
 
     // Wind function (creates varying wind over time)

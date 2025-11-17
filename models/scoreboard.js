@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { SCOREBOARD_COLORS } from '../config/colors.js';
 
 /**
  * Creates a scoreboard screen (for 'Projects') with canvas texture.
@@ -9,15 +10,19 @@ export function createScoreboard() {
 
     const pillarGroup = new THREE.Group();
 
-    const pillarGeometry = new THREE.CylinderGeometry(0.2, 0.2, 6, 32);
-    const pillarMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true });
+    const pillarGeometry = new THREE.CylinderGeometry(0.2, 0.2, 8, 32);
+    const pillarMaterial = new THREE.MeshStandardMaterial({ 
+        color: SCOREBOARD_COLORS.PILLAR,
+        roughness: 0.6,
+        metalness: 0.2
+    });
     
     const pillarLeft = new THREE.Mesh(pillarGeometry, pillarMaterial);
-    pillarLeft.position.set(66-5, 3, -46-5);
+    pillarLeft.position.set(66-5, 4, -46-5);
     pillarGroup.add(pillarLeft);
 
     const pillarRight = new THREE.Mesh(pillarGeometry, pillarMaterial);
-    pillarRight.position.set(66+5, 3, -46+5);
+    pillarRight.position.set(66+5, 4, -46+5);
     pillarGroup.add(pillarRight);
 
     const screenGeometry = new THREE.BoxGeometry(16, 9, 0.4);
@@ -27,11 +32,11 @@ export function createScoreboard() {
     scoreboardCanvas.height = 900/2;
     const scoreboardCtx = scoreboardCanvas.getContext('2d');
     // Background
-    scoreboardCtx.fillStyle = '#000';
+    scoreboardCtx.fillStyle = SCOREBOARD_COLORS.BACKGROUND;
     scoreboardCtx.fillRect(0, 0, scoreboardCanvas.width, scoreboardCanvas.height);
 
     // Draw a gray rectangle boundary (stroke)
-    scoreboardCtx.strokeStyle = '#888';
+    scoreboardCtx.strokeStyle = SCOREBOARD_COLORS.BORDER;
     scoreboardCtx.lineWidth = 10;
     scoreboardCtx.strokeRect(
         5, 
@@ -41,18 +46,23 @@ export function createScoreboard() {
     );
 
     // Title: Home : Away
-    scoreboardCtx.fillStyle = '#00ff00';
+    scoreboardCtx.fillStyle = SCOREBOARD_COLORS.HOME_COLOR;
     scoreboardCtx.font = 'bold 60px Arial';
     scoreboardCtx.textAlign = 'center';
-    scoreboardCtx.fillText('Home : Away', scoreboardCanvas.width / 2, 100);
+    scoreboardCtx.fillText('HOME', scoreboardCanvas.width / 4, 100);
+    
+    scoreboardCtx.fillStyle = SCOREBOARD_COLORS.AWAY_COLOR;
+    scoreboardCtx.font = 'bold 60px Arial';
+    scoreboardCtx.textAlign = 'center';
+    scoreboardCtx.fillText('AWAY', scoreboardCanvas.width * 3 / 4, 100);
 
     // Score: 3 : 2
-    scoreboardCtx.fillStyle = '#ffffff';
+    scoreboardCtx.fillStyle = SCOREBOARD_COLORS.SCORE;
     scoreboardCtx.font = 'bold 170px Arial';
     scoreboardCtx.fillText('3  :  2', scoreboardCanvas.width / 2, 300);
 
     // Optional: Add a subtle "FULL TIME" label below the scores (optional)
-    scoreboardCtx.fillStyle = '#cccccc';
+    scoreboardCtx.fillStyle = SCOREBOARD_COLORS.LABEL;
     scoreboardCtx.font = '40px Arial';
     scoreboardCtx.fillText('FULL TIME', scoreboardCanvas.width / 2, 400);
 
@@ -61,7 +71,7 @@ export function createScoreboard() {
         screenGeometry, 
         new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(scoreboardCanvas), flatShading: true })
     );
-    screen.position.set(66, 8, -46);
+    screen.position.set(66, 12, -46);
     screen.rotateOnAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 4);
     pillarGroup.add(screen);
 
