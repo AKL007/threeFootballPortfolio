@@ -7,6 +7,7 @@ import { createAllStands } from './stands.js';
 import { createTifo } from './tifo.js';
 import { createScoreboard } from './scoreboard.js';
 import { createDugout } from './dugout.js';
+import { createTreeCluster } from './trees.js';
 import { STADIUM_COLORS } from '../config/colors.js';
 
 /**
@@ -73,6 +74,26 @@ export function createStadium(helperParent = null) {
 
     // ----- Dugout (for 'Analytics') with iPad displays -----
     stadiumGroup.add(createDugout());
+
+    // ----- Trees in Corner Areas -----
+    // Add trees in three corners (excluding northeast corner where scoreboard is)
+    // Northwest corner
+    // stadiumGroup.add(createTreeCluster(-70, 50, 6, 10));
+    // // Southwest corner
+    // stadiumGroup.add(createTreeCluster(-70, -50, 6, 10));
+    // // Southeast corner
+    // stadiumGroup.add(createTreeCluster(70, 50, 6, 10));
+    // Northeast corner (where scoreboard is) - skipped
+
+    // ----- Trees behind the stands all along the sides -----
+    for (let i = -95; i < 105; i+=10) {
+        stadiumGroup.add(createTreeCluster(i, -85 , 10, 20));
+        stadiumGroup.add(createTreeCluster(i, 85, 10, 20));
+    }
+    for (let i = -75; i < 75; i+=10) {
+        stadiumGroup.add(createTreeCluster(-105, i, 10, 20));
+    stadiumGroup.add(createTreeCluster(105, i, 10, 20));
+    }
 
     return stadiumGroup;
 }
