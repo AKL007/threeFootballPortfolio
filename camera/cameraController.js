@@ -96,6 +96,12 @@ export function updateFlyCamera(delta, camera) {
 }
 
 export function updateCamera(delta, camera, player) {
+    // Scroll mode takes priority (when scrolling through the page)
+    if (gameState.scrollMode) {
+        // Scroll camera is updated by scroll event, not here
+        return;
+    }
+    
     // Fly camera mode takes priority
     if (gameState.flyMode) {
         updateFlyCamera(delta, camera);

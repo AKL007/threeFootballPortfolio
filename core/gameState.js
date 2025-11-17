@@ -19,6 +19,11 @@ export const gameState = {
     currentLookAt: null,
     actionPower: 0, // Power level for pass/shoot/lob (0-1)
     isChargingAction: false,
-    currentActionType: null // 'pass', 'through', 'lob', 'shoot'
+    currentActionType: null, // 'pass', 'through', 'lob', 'shoot'
+    scrollMode: true, // Start in scroll mode
+    scrollStartPos: null,
+    scrollStartLookAt: null,
+    scrollEndPos: null,
+    scrollEndLookAt: null
 };
 
