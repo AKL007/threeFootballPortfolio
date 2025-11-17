@@ -45,7 +45,7 @@ export function createRenderer() {
     // Enable physically correct lighting
     renderer.useLegacyLights = false;
     
-    document.body.appendChild(renderer.domElement);
+    // Canvas will be appended to canvas-container in main.js
     return renderer;
 }
 

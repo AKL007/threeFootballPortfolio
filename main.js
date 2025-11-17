@@ -22,6 +22,7 @@ import { setupKeyboardControls, setBallReference } from './controls/keyboard.js'
 import { updatePlayerMovement } from './game/playerMovement.js';
 import { updateBall } from './game/ballPhysics.js';
 import { updateCamera } from './camera/cameraController.js';
+import { setupScrollListener, updatePlayerReference } from './camera/scrollController.js';
 
 // UI
 import { updateUI } from './ui/ui.js';
@@ -31,6 +32,12 @@ import './ui/configPanel.js'; // Initialize config panel
 const scene = createScene();
 const camera = createCamera();
 const renderer = createRenderer();
+
+// Move canvas to canvas-container
+const canvasContainer = document.getElementById('canvas-container');
+if (canvasContainer) {
+    canvasContainer.appendChild(renderer.domElement);
+}
 
 // Setup lighting
 setupLighting(scene);
@@ -47,15 +54,20 @@ createPlayer((model, mixer) => {
     player = model;
     playerMixer = mixer;
     scene.add(player);
+    // Update scroll controller with player reference
+    updatePlayerReference(player);
 });
 
 const ball = createBall();
 scene.add(ball);
 setBallReference(ball); // Set ball reference for reset functionality
 
-// Camera setup
-camera.position.set(0, 90, -20);
-camera.lookAt(0,0,0);
+// Camera setup - start with top-down view for scroll animation
+camera.position.set(0, 200, 0);
+camera.lookAt(0, 0, 0);
+
+// Setup scroll listener immediately (works even before player loads)
+setupScrollListener(camera, null);
 
 // Setup controls (will be set up after player loads)
 let controlsSetup = false;
