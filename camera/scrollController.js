@@ -112,6 +112,18 @@ function updateContentLayerVisibility() {
             contentLayer.style.pointerEvents = 'none';
         }
     }
+    
+    // Hide UI and instructions when in scroll mode
+    const uiElement = document.getElementById('ui');
+    const instructionsElement = document.getElementById('instructions');
+    
+    if (uiElement) {
+        uiElement.style.display = gameState.scrollMode ? 'none' : 'block';
+    }
+    
+    if (instructionsElement) {
+        instructionsElement.style.display = gameState.scrollMode ? 'none' : 'block';
+    }
 }
 
 // Store camera and player references for scroll updates
