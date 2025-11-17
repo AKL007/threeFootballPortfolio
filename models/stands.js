@@ -171,10 +171,10 @@ export function createStands(
     housing.add(floodLightDir.target);
 
     // Visualize direction light with helper (add to helperParent to avoid double transform)
-    if (helperParent) {
-      const helper = new THREE.DirectionalLightHelper(floodLightDir, 1, 0xffff88);
-      helperParent.add(helper);
-    }
+    // if (helperParent) {
+    //   const helper = new THREE.DirectionalLightHelper(floodLightDir, 1, 0xffff88);
+    //   helperParent.add(helper);
+    // }
 
     housing.rotation.y = Math.PI;
     housing.rotation.x = -Math.PI / 9;

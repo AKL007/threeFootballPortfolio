@@ -125,8 +125,113 @@ function createGrassBladeGeometry(length, width) {
     return geometry;
 }
 
-// Create grass field using instanced meshes
-export function createGrassField(width, height, density = 200) {
+/**
+ * Creates a grid pattern grass field mimicking mowed grass (alternating columns and rows)
+ * @param {number} width - Field width
+ * @param {number} height - Field height
+ * @param {number} numColumns - Number of columns (default: 18)
+ * @param {number} numRows - Number of rows (default: 18)
+ * @returns {THREE.Group} Group containing the grass grid
+ */
+export function createGridPatternGrass(width, height, numColumns = 18, numRows = 18) {
+    const grassGroup = new THREE.Group();
+    
+    const columnWidth = width / numColumns;
+    const rowHeight = height / numRows;
+    
+    // Define base shades for columns and rows
+    const columnShade1 = new THREE.Color(0x7ab37a); // Lighter green for even columns
+    const columnShade2 = new THREE.Color(0x6a9a6a); // Darker green for odd columns
+    const rowShade1 = new THREE.Color(0x85b485);    // Lighter green for even rows
+    const rowShade2 = new THREE.Color(0x75a575);    // Darker green for odd rows
+    
+    // Helper function to blend two colors
+    const blendColors = (color1, color2) => {
+        const blended = new THREE.Color();
+        blended.r = (color1.r + color2.r) / 2;
+        blended.g = (color1.g + color2.g) / 2;
+        blended.b = (color1.b + color2.b) / 2;
+        return blended;
+    };
+    
+    // Create 2m border around the field with basic grass color
+    const borderWidth = 1.0;
+    const borderColor = new THREE.Color(0x7fb37f); // Basic grass green
+    
+    const borderMaterial = new THREE.MeshStandardMaterial({ 
+        color: borderColor,
+        roughness: 0.9,
+        metalness: 0.0
+    });
+    
+    // Create borders (extended to cover corners)
+    const borders = [
+        { width: width + 2 * borderWidth, height: borderWidth, x: 0, z: height / 2 + borderWidth / 2 },      // Top
+        { width: width + 2 * borderWidth, height: borderWidth, x: 0, z: -height / 2 - borderWidth / 2 },   // Bottom
+        { width: borderWidth, height: height + 2 * borderWidth, x: -width / 2 - borderWidth / 2, z: 0 },   // Left
+        { width: borderWidth, height: height + 2 * borderWidth, x: width / 2 + borderWidth / 2, z: 0 }     // Right
+    ];
+    
+    borders.forEach(border => {
+        const mesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(border.width, border.height, 1, 1),
+            borderMaterial
+        );
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.set(border.x, 0, border.z);
+        mesh.receiveShadow = true;
+        grassGroup.add(mesh);
+    });
+    
+    // Create grid of squares with blended colors
+    for (let col = 0; col < numColumns; col++) {
+        for (let row = 0; row < numRows; row++) {
+            // Determine column and row shades (alternating)
+            const columnShade = col % 2 === 0 ? columnShade1 : columnShade2;
+            const rowShade = row % 2 === 0 ? rowShade1 : rowShade2;
+            
+            // Blend column and row shades where they overlap
+            const blendedColor = blendColors(columnShade, rowShade);
+            
+            // Create material with blended color
+            const material = new THREE.MeshStandardMaterial({ 
+                color: blendedColor,
+                roughness: 0.9,
+                metalness: 0.0
+            });
+            
+            // Create square plane (low-poly: 1x1 segments)
+            const square = new THREE.Mesh(
+                new THREE.PlaneGeometry(columnWidth, rowHeight, 1, 1),
+                material
+            );
+            
+            // Rotate to lie flat on the ground
+            square.rotation.x = -Math.PI / 2;
+            
+            // Position the square in the grid (centered)
+            square.position.set(
+                (col - numColumns / 2) * columnWidth + columnWidth / 2,
+                0,
+                (row - numRows / 2) * rowHeight + rowHeight / 2
+            );
+            
+            square.receiveShadow = true;
+            grassGroup.add(square);
+        }
+    }
+    
+    return grassGroup;
+}
+
+/**
+ * Creates an instanced grass field with individual grass blades
+ * @param {number} width - Field width
+ * @param {number} height - Field height
+ * @param {number} density - Grass density (default: 200)
+ * @returns {THREE.Group} Group containing the grass field with base plane and instanced blades
+ */
+export function createInstancedGrassBlades(width, height, density = 200) {
     const grassGroup = new THREE.Group();
     
     // Create base plane for the field (for shadows and base color)
@@ -164,16 +269,12 @@ export function createGrassField(width, height, density = 200) {
         uniforms: {
             time: { value: 0 },
             windDirection: { value: new THREE.Vector3(1, 0, 0.5).normalize() },
-            windStrength: { value: 0.005 },
-            // lightDirection: { value: new THREE.Vector3(-50, -100, -50).normalize() }, // Matches scene directional light
-            // lightIntensity: { value: 1.0 }
+            windStrength: { value: 0.005 }
         }
     });
     
     grassMesh.material = grassMaterial;
-    // grassMesh.castShadow = true;
-    // grassMesh.receiveShadow = false;
-    grassMesh.frustumCulled = false; // ADD THIS LINE - prevents culling when camera moves
+    grassMesh.frustumCulled = false;
     
     // Create instance attributes
     const instancePositions = new Float32Array(instanceCount * 3);
@@ -199,8 +300,7 @@ export function createGrassField(width, height, density = 200) {
         // Random rotation around Y axis
         instanceRotations[i] = random() * Math.PI * 2;
         
-        // Random scale (0.7 to 1.3)
-        // instanceScales[i] = 0.7 + random() * 0.6;
+        // Random scale based on position pattern
         instanceScales[i] = (Math.floor(z / 3.5, 0) % 2 == 0 ? 0.5 : 0.2) + (Math.floor(x / 5.5, 0) % 2 == 0 ? 1 : 0) * 0.3;
         
         // Random color variation (green shades)
@@ -227,6 +327,54 @@ export function createGrassField(width, height, density = 200) {
     grassGroup.userData.material = grassMaterial;
     
     return grassGroup;
+}
+
+/**
+ * Creates a grass field using the specified method
+ * @param {number} width - Field width
+ * @param {number} height - Field height
+ * @param {string} method - 'grid' for grid pattern, 'instanced' for instanced blades (default: 'grid')
+ * @param {object} options - Additional options based on method
+ * @returns {THREE.Group} Group containing the grass field
+ */
+export function createGrassField(width, height, method = 'grid', options = {}) {
+    if (method === 'instanced') {
+        const density = options.density || 200;
+        return createInstancedGrassBlades(width, height, density);
+    } else {
+        const numColumns = options.numColumns || 18;
+        const numRows = options.numRows || 18;
+        return createGridPatternGrass(width, height, numColumns, numRows);
+    }
+}
+
+/**
+ * Creates an extended grass area that goes under the stands
+ * @param {number} fieldWidth - Field width
+ * @param {number} fieldHeight - Field height
+ * @param {number} extension - How many meters to extend beyond the field (default: 10)
+ * @returns {THREE.Mesh} Mesh containing the extended grass area
+ */
+export function createExtendedGrassArea(fieldWidth, fieldHeight, extension = 10) {
+    const extendedWidth = fieldWidth + 2 * extension;
+    const extendedHeight = fieldHeight + 2 * extension;
+    
+    const grassMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0x7fb37f, // Basic grass green
+        roughness: 0.9,
+        metalness: 0.0
+    });
+    
+    const extendedGrass = new THREE.Mesh(
+        new THREE.PlaneGeometry(extendedWidth, extendedHeight, 1, 1),
+        grassMaterial
+    );
+    
+    extendedGrass.rotation.x = -Math.PI / 2;
+    extendedGrass.position.set(0, -0.01, 0); // Slightly below field grass but above ground
+    extendedGrass.receiveShadow = true;
+    
+    return extendedGrass;
 }
 
 // Update grass animation

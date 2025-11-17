@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createGrassField } from './grass.js';
+import { createGrassField, createExtendedGrassArea } from './grass.js';
 import { createFieldMarkings, createPenaltyArea } from './fieldMarkings.js';
 import { createGoal } from './goals.js';
 import { createAllAdvertisementBoards } from './advertisementBoards.js';
@@ -32,11 +32,15 @@ export function createStadium(helperParent = null) {
     ground.receiveShadow = true;
     stadiumGroup.add(ground);
 
-    // ----- Grass Field -----
-    // Realistic grass field (imported/shader-based).
+    // ----- Extended Grass Area (under stands) -----
     const fieldWidth = 110;
     const fieldHeight = 70;
-    const grassField = createGrassField(fieldWidth, fieldHeight);
+    const extendedGrass = createExtendedGrassArea(fieldWidth, fieldHeight, 10);
+    stadiumGroup.add(extendedGrass);
+
+    // ----- Grass Field -----
+    // Realistic grass field (imported/shader-based).
+    const grassField = createGrassField(fieldWidth, fieldHeight, 'instanced', {density: 400});
     stadiumGroup.add(grassField);
     stadiumGroup.userData.grassField = grassField; // Reference for animation.
 

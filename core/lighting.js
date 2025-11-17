@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-export function setupLighting(scene) {
+export function setupLighting(scene, debug = false) {
     // Ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambientLight);
@@ -28,8 +28,11 @@ export function setupLighting(scene) {
     
     // scene.add(directionalLight);
 
-    const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
-    scene.add(directionalLightHelper);
+    // Only show directional light helper in debug mode
+    if (debug) {
+        const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
+        scene.add(directionalLightHelper);
+    }
     
     // Optional: Add a subtle fill light from the opposite side
     const fillLight = new THREE.DirectionalLight(0xffffff, 0.2);
