@@ -37,7 +37,7 @@ setupLighting(scene);
 
 // Create game objects
 // const stadium = await createStadium();
-const stadium = createStadium();
+const stadium = createStadium(scene);
 scene.add(stadium);
 
 let player = null;
@@ -115,4 +115,6 @@ window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    // Update pixel ratio on resize
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });

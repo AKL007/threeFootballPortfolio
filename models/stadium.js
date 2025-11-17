@@ -10,17 +10,22 @@ import { createDugout } from './dugout.js';
 
 /**
  * Creates and returns a fully decorated 3D stadium for use with Three.js.
+ * @param {THREE.Object3D} helperParent - Optional parent for light helpers (should be scene or untransformed group)
  */
-export function createStadium() {
+export function createStadium(helperParent = null) {
     const stadiumGroup = new THREE.Group();
 
     // ----- Ground Plane -----
     // Large flat ground plane on which everything sits.
-    const stadiumWidth = 2000;
-    const stadiumDepth = 1400;
+    const stadiumWidth = 1000;
+    const stadiumDepth = 1000;
     const ground = new THREE.Mesh(
         new THREE.PlaneGeometry(stadiumWidth, stadiumDepth),
-        new THREE.MeshLambertMaterial({ color: 0x555555, flatShading: true })
+        new THREE.MeshStandardMaterial({ 
+            color: 0x555555,
+            roughness: 0.8,
+            metalness: 0.0
+        })
     );
     ground.rotation.x = -Math.PI / 2;
     ground.position.set(0, -0.05, 0);
@@ -50,7 +55,7 @@ export function createStadium() {
     stadiumGroup.add(createAllAdvertisementBoards());
 
     // ----- Stadium Stands (Bleachers) -----
-    stadiumGroup.add(createAllStands(20));
+    stadiumGroup.add(createAllStands(20, helperParent));
 
     // ----- TIFO Area (for 'Resume') -----
     const tifo = createTifo();

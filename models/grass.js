@@ -131,9 +131,10 @@ export function createGrassField(width, height, density = 200) {
     
     // Create base plane for the field (for shadows and base color)
     const baseGeometry = new THREE.PlaneGeometry(width + 20, height + 20, 8, 1);
-    const baseMaterial = new THREE.MeshLambertMaterial({ 
+    const baseMaterial = new THREE.MeshStandardMaterial({ 
         color: 0x85b485,
-        flatShading: true 
+        roughness: 0.9,
+        metalness: 0.0
     });
     const basePlane = new THREE.Mesh(baseGeometry, baseMaterial);
     basePlane.rotation.x = -Math.PI / 2;
@@ -141,7 +142,7 @@ export function createGrassField(width, height, density = 200) {
     grassGroup.add(basePlane);
     
     // Create grass blade geometry
-    const grassBladeLength = 0.02;
+    const grassBladeLength = 0.005;
     const grassBladeWidth = 0.1;
     const bladeGeometry = createGrassBladeGeometry(grassBladeLength, grassBladeWidth);
     
@@ -170,8 +171,8 @@ export function createGrassField(width, height, density = 200) {
     });
     
     grassMesh.material = grassMaterial;
-    grassMesh.castShadow = true;
-    grassMesh.receiveShadow = false;
+    // grassMesh.castShadow = true;
+    // grassMesh.receiveShadow = false;
     grassMesh.frustumCulled = false; // ADD THIS LINE - prevents culling when camera moves
     
     // Create instance attributes

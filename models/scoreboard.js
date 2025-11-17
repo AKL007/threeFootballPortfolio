@@ -10,7 +10,11 @@ export function createScoreboard() {
     const pillarGroup = new THREE.Group();
 
     const pillarGeometry = new THREE.CylinderGeometry(0.2, 0.2, 6, 32);
-    const pillarMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true });
+    const pillarMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0xffffff,
+        roughness: 0.6,
+        metalness: 0.2
+    });
     
     const pillarLeft = new THREE.Mesh(pillarGeometry, pillarMaterial);
     pillarLeft.position.set(66-5, 3, -46-5);

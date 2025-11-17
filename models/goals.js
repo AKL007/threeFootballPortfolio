@@ -16,7 +16,11 @@ export function createGoal(x, z) {
     const goalDepth = 1.5;
 
     // Materials
-    const postMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true });
+    const postMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0xffffff,
+        roughness: 0.4,
+        metalness: 0.8
+    });
     const netMaterial = new THREE.MeshBasicMaterial({
         color: 0xbbbbbb,
         wireframe: true,

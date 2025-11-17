@@ -1,6 +1,7 @@
 // TODO: change from Math.atan to Math.atan2 (check other files as well)
 
 import * as THREE from 'three';
+import { Scene } from 'three';
 
 /**
  * Creates a stadium stand block, including base, rails, and stepped seating.
@@ -10,6 +11,7 @@ import * as THREE from 'three';
  * @param {number} depth - Stepped depth (number of rows)
  * @param {number} baseHeight - Base block height
  * @param {number} rotationY - Orientation (radians)
+ * @param {THREE.Object3D} helperParent - Optional parent for light helpers (should be scene or untransformed group)
  * @returns {THREE.Group} Group containing the stadium stand
  */
 export function createStands(
@@ -18,7 +20,8 @@ export function createStands(
   width,
   depth,
   baseHeight,
-  rotationY
+  rotationY,
+  helperParent = null
 ) {
   const standsGroup = new THREE.Group();
 
@@ -159,6 +162,20 @@ export function createStands(
       innerLight.position.set(xLight, yLight, zLight);
       housing.add(innerLight);
     }
+
+    // Add a DirectionalLight to each floodlight housing
+    const floodLightDir = new THREE.DirectionalLight(0xeaf5ff, 0.15);
+    floodLightDir.position.set(0 ,0 ,0);
+    floodLightDir.target.position.set(0, -1, 5);
+    housing.add(floodLightDir);
+    housing.add(floodLightDir.target);
+
+    // Visualize direction light with helper (add to helperParent to avoid double transform)
+    if (helperParent) {
+      const helper = new THREE.DirectionalLightHelper(floodLightDir, 1, 0xffff88);
+      helperParent.add(helper);
+    }
+
     housing.rotation.y = Math.PI;
     housing.rotation.x = -Math.PI / 9;
     standsGroup.add(housing);
@@ -166,7 +183,7 @@ export function createStands(
 
   //-- RAILINGS --
   const hypotenuseLength = depth * Math.sqrt(stepHeight ** 2 + stepDepth ** 2);
-  const railMaterial = new THREE.MeshLambertMaterial({ color: 0xda020e, flatShading: true });
+  const railMaterial = new THREE.MeshStandardMaterial({ color: 0xda020e, roughness: 0.3, metalness: 0.8 });
 
   // Utility for rails
   const addRail = (side) => {
@@ -224,6 +241,7 @@ export function createStands(
   const seatBaseGeometry = new THREE.BoxGeometry(seatWidth * 0.95, seatHeight * 0.5, seatDepthValue * 0.75);
   const seatBackGeometry = new THREE.BoxGeometry(seatWidth * 0.85, seatHeight * 3, seatDepthValue * 0.18);
   const seatMaterial = new THREE.MeshLambertMaterial({ color: seatColor, flatShading: true });
+//   const seatMaterial = new THREE.MeshStandardMaterial({ color: seatColor, roughness: 0.1, metalness: 0.8 });
 
   const seatBaseInst = new THREE.InstancedMesh(seatBaseGeometry, seatMaterial, seatCount);
   const seatBackInst = new THREE.InstancedMesh(seatBackGeometry, seatMaterial, seatCount);
@@ -261,20 +279,24 @@ export function createStands(
   //-- FINAL PLACEMENT --
   standsGroup.position.set(x, 0, z);
   standsGroup.rotation.y = rotationY;
+
+
   return standsGroup;
 }
 
 /**
  * Creates all stadium stands around the field.
+ * @param {number} standDepth - Depth of the stands
+ * @param {THREE.Object3D} helperParent - Optional parent for light helpers (should be scene or untransformed group)
  * @returns {THREE.Group} Group containing all stadium stands
  */
-export function createAllStands(standDepth = 30) {
+export function createAllStands(standDepth = 30, helperParent = null) {
   const standsGroup = new THREE.Group();
   const baseHeight = 1;
   // Add stands on each side of the field
-  standsGroup.add(createStands(0, -60, 120, standDepth, baseHeight, Math.PI, 10, 0));
-  standsGroup.add(createStands(0, 60, 120, standDepth, baseHeight, 0));
-  standsGroup.add(createStands(-80, 0, 80, standDepth, baseHeight, -Math.PI / 2));
-  standsGroup.add(createStands(80, 0, 80, standDepth, baseHeight, Math.PI / 2, 0, 10));
+  standsGroup.add(createStands(0, -60, 120, standDepth, baseHeight, Math.PI, helperParent));
+  standsGroup.add(createStands(0, 60, 120, standDepth, baseHeight, 0, helperParent));
+  standsGroup.add(createStands(-80, 0, 80, standDepth, baseHeight, -Math.PI / 2, helperParent));
+  standsGroup.add(createStands(80, 0, 80, standDepth, baseHeight, Math.PI / 2, helperParent));
   return standsGroup;
 }

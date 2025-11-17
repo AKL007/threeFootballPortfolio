@@ -11,7 +11,7 @@ import * as THREE from 'three';
 export function createAdvertisementBoard(x, z, rotationY, length) {
     const board = new THREE.Mesh(
         new THREE.BoxGeometry(length, 2, 0.1),
-        new THREE.MeshLambertMaterial({ color: 0xda020e, flatShading: true })
+        new THREE.MeshLambertMaterial({ color: 0x001100, flatShading: true })
     );
     board.position.set(x, 0, z);
     board.rotateOnAxis(new THREE.Vector3(0, 1, 0), rotationY);
