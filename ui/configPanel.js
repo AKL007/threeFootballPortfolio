@@ -3,6 +3,8 @@
  * Allows play-testing of game constants through a UI panel
  */
 
+import { UI_COLORS } from '../config/colors.js';
+
 let configPanelVisible = false;
 let configPanel = null;
 
@@ -26,9 +28,9 @@ function createConfigInput(path, value, type = 'number', step = 0.1) {
     input.style.width = '100px';
     input.style.padding = '5px';
     input.style.borderRadius = '4px';
-    input.style.border = '1px solid #555';
-    input.style.background = '#2a2a2a';
-    input.style.color = 'white';
+    input.style.border = `1px solid ${UI_COLORS.CONFIG_PANEL_INPUT_BORDER}`;
+    input.style.background = UI_COLORS.CONFIG_PANEL_INPUT_BG;
+    input.style.color = UI_COLORS.CONFIG_PANEL_TEXT;
     
     // Update config value when input changes
     input.addEventListener('input', (e) => {
@@ -80,7 +82,7 @@ function createConfigSection(config, prefix = '', container) {
             sectionHeader.style.marginTop = '15px';
             sectionHeader.style.marginBottom = '10px';
             sectionHeader.style.fontSize = '14px';
-            sectionHeader.style.color = '#4a9eff';
+            sectionHeader.style.color = UI_COLORS.CONFIG_PANEL_HEADER;
             container.appendChild(sectionHeader);
             
             // Recursively create config for nested object
@@ -139,13 +141,13 @@ function createConfigPanel() {
         right: 20px;
         width: 500px;
         max-height: 80vh;
-        background: rgba(0, 0, 0, 0.95);
-        border: 2px solid #4a9eff;
+        background: ${UI_COLORS.CONFIG_PANEL_BG};
+        border: 2px solid ${UI_COLORS.CONFIG_PANEL_BORDER};
         border-radius: 8px;
         padding: 20px;
         z-index: 2000;
         overflow-y: auto;
-        color: white;
+        color: ${UI_COLORS.CONFIG_PANEL_TEXT};
         font-family: 'Courier New', monospace;
         font-size: 12px;
         display: none;
@@ -158,21 +160,21 @@ function createConfigPanel() {
         align-items: center;
         margin-bottom: 20px;
         padding-bottom: 10px;
-        border-bottom: 1px solid #4a9eff;
+        border-bottom: 1px solid ${UI_COLORS.CONFIG_PANEL_BORDER};
     `;
     
     const title = document.createElement('h2');
     title.textContent = 'Game Config (Play-Testing)';
     title.style.margin = '0';
     title.style.fontSize = '16px';
-    title.style.color = '#4a9eff';
+    title.style.color = UI_COLORS.CONFIG_PANEL_HEADER;
     
     const closeBtn = document.createElement('button');
     closeBtn.textContent = '×';
     closeBtn.style.cssText = `
-        background: #ff4444;
+        background: ${UI_COLORS.CONFIG_PANEL_CLOSE_BTN};
         border: none;
-        color: white;
+        color: ${UI_COLORS.CONFIG_PANEL_TEXT};
         width: 30px;
         height: 30px;
         border-radius: 4px;

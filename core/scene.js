@@ -1,11 +1,12 @@
 import * as THREE from 'three';
+import { SCENE_COLORS } from '../config/colors.js';
 
 export function createScene() {
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xb9defe); // Sky blue
+    scene.background = new THREE.Color(SCENE_COLORS.SKY_BLUE);
     
     // Add fog for atmospheric depth
-    scene.fog = new THREE.FogExp2(0xb9defe, 0.005); // Exponential fog
+    scene.fog = new THREE.FogExp2(SCENE_COLORS.SKY_BLUE, 0.005); // Exponential fog
 
     // debug utils
     const debugHelper = new THREE.AxesHelper(2);

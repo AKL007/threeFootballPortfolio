@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GRASS_COLORS } from '../config/colors.js';
 
 // Grass shader material
 const grassVertexShader = `
@@ -140,10 +141,10 @@ export function createGridPatternGrass(width, height, numColumns = 18, numRows =
     const rowHeight = height / numRows;
     
     // Define base shades for columns and rows
-    const columnShade1 = new THREE.Color(0x7ab37a); // Lighter green for even columns
-    const columnShade2 = new THREE.Color(0x6a9a6a); // Darker green for odd columns
-    const rowShade1 = new THREE.Color(0x85b485);    // Lighter green for even rows
-    const rowShade2 = new THREE.Color(0x75a575);    // Darker green for odd rows
+    const columnShade1 = new THREE.Color(GRASS_COLORS.COLUMN_SHADE_1);
+    const columnShade2 = new THREE.Color(GRASS_COLORS.COLUMN_SHADE_2);
+    const rowShade1 = new THREE.Color(GRASS_COLORS.ROW_SHADE_1);
+    const rowShade2 = new THREE.Color(GRASS_COLORS.ROW_SHADE_2);
     
     // Helper function to blend two colors
     const blendColors = (color1, color2) => {
@@ -156,7 +157,7 @@ export function createGridPatternGrass(width, height, numColumns = 18, numRows =
     
     // Create 2m border around the field with basic grass color
     const borderWidth = 1.0;
-    const borderColor = new THREE.Color(0x7fb37f); // Basic grass green
+    const borderColor = new THREE.Color(GRASS_COLORS.BORDER);
     
     const borderMaterial = new THREE.MeshStandardMaterial({ 
         color: borderColor,
@@ -237,7 +238,7 @@ export function createInstancedGrassBlades(width, height, density = 200) {
     // Create base plane for the field (for shadows and base color)
     const baseGeometry = new THREE.PlaneGeometry(width + 20, height + 20, 8, 1);
     const baseMaterial = new THREE.MeshStandardMaterial({ 
-        color: 0x85b485,
+        color: GRASS_COLORS.BASE_PLANE,
         roughness: 0.9,
         metalness: 0.0
     });
@@ -360,7 +361,7 @@ export function createExtendedGrassArea(fieldWidth, fieldHeight, extension = 10)
     const extendedHeight = fieldHeight + 2 * extension;
     
     const grassMaterial = new THREE.MeshStandardMaterial({ 
-        color: 0x7fb37f, // Basic grass green
+        color: GRASS_COLORS.BORDER,
         roughness: 0.9,
         metalness: 0.0
     });

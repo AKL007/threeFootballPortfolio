@@ -7,6 +7,7 @@ import { createAllStands } from './stands.js';
 import { createTifo } from './tifo.js';
 import { createScoreboard } from './scoreboard.js';
 import { createDugout } from './dugout.js';
+import { STADIUM_COLORS } from '../config/colors.js';
 
 /**
  * Creates and returns a fully decorated 3D stadium for use with Three.js.
@@ -22,7 +23,7 @@ export function createStadium(helperParent = null) {
     const ground = new THREE.Mesh(
         new THREE.PlaneGeometry(stadiumWidth, stadiumDepth),
         new THREE.MeshStandardMaterial({ 
-            color: 0x555555,
+            color: STADIUM_COLORS.GROUND,
             roughness: 0.8,
             metalness: 0.0
         })

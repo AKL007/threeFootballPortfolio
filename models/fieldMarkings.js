@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { FIELD_MARKINGS_COLORS } from '../config/colors.js';
 
 /**
  * Creates a field line from an array of points.
@@ -19,7 +20,7 @@ export function createLine(points, lineMaterial) {
  */
 export function createFieldMarkings() {
     const markingsGroup = new THREE.Group();
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+    const lineMaterial = new THREE.LineBasicMaterial({ color: FIELD_MARKINGS_COLORS.WHITE });
 
     // Center Line
     markingsGroup.add(createLine([
@@ -50,7 +51,7 @@ export function createFieldMarkings() {
     // Center Circle
     const centerCircle = new THREE.Mesh(
         new THREE.RingGeometry(10, 10.05, 64),
-        new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, flatShading: true })
+        new THREE.MeshBasicMaterial({ color: FIELD_MARKINGS_COLORS.WHITE, side: THREE.DoubleSide, flatShading: true })
     );
     centerCircle.rotation.x = -Math.PI / 2;
     centerCircle.position.y = 0.01;
@@ -59,7 +60,7 @@ export function createFieldMarkings() {
     // Center Spot
     const centerSpot = new THREE.Mesh(
         new THREE.CircleGeometry(0.2, 8),
-        new THREE.MeshBasicMaterial({ color: 0xffffff, flatShading: true })
+        new THREE.MeshBasicMaterial({ color: FIELD_MARKINGS_COLORS.WHITE, flatShading: true })
     );
     centerSpot.rotation.x = -Math.PI / 2;
     centerSpot.position.set(0, 0.01, 0);
@@ -76,7 +77,7 @@ export function createFieldMarkings() {
  */
 export function createPenaltyArea(x, z) {
     const penaltyGroup = new THREE.Group();
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+    const lineMaterial = new THREE.LineBasicMaterial({ color: FIELD_MARKINGS_COLORS.WHITE });
 
     // Penalty box outline
     const penaltyBoxPts = [
@@ -105,7 +106,7 @@ export function createPenaltyArea(x, z) {
     // Penalty spot
     const penSpot = new THREE.Mesh(
         new THREE.CircleGeometry(0.2, 8),
-        new THREE.MeshBasicMaterial({ color: 0xffffff, flatShading: true })
+        new THREE.MeshBasicMaterial({ color: FIELD_MARKINGS_COLORS.WHITE, flatShading: true })
     );
     penSpot.rotation.x = -Math.PI / 2;
     penSpot.position.set(x > 0 ? -12 : 12, 0.02, 0);

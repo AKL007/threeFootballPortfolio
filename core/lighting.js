@@ -1,12 +1,13 @@
 import * as THREE from 'three';
+import { LIGHTING_COLORS } from '../config/colors.js';
 
 export function setupLighting(scene, debug = false) {
     // Ambient light
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+    const ambientLight = new THREE.AmbientLight(LIGHTING_COLORS.AMBIENT, 1);
     scene.add(ambientLight);
 
     // Directional light with improved shadow settings
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.15);
+    const directionalLight = new THREE.DirectionalLight(LIGHTING_COLORS.DIRECTIONAL, 0.15);
     directionalLight.position.set(50, 50, 50);
     directionalLight.castShadow = true;
     
@@ -35,7 +36,7 @@ export function setupLighting(scene, debug = false) {
     }
     
     // Optional: Add a subtle fill light from the opposite side
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.2);
+    const fillLight = new THREE.DirectionalLight(LIGHTING_COLORS.FILL, 0.2);
     fillLight.position.set(-50, 50, -50);
     scene.add(fillLight);
 }
