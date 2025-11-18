@@ -6,4 +6,6 @@ dist/
 /models/glb/*
 /models/fbx/*
 /public/models/glb/*
+!/public/models/glb/optimized/
+!/public/models/glb/optimized/*
 /public/models/fbx/*
