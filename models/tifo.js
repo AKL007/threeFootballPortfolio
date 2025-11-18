@@ -10,7 +10,7 @@ export function createTifo() {
     const TIFO_HEIGHT = 12;
     const CANVAS_WIDTH = 1600;
     const CANVAS_HEIGHT = 900;
-    const IMAGE_SRC = 'public/images/adidasWallpaper.jpg';
+    const IMAGE_SRC = '/images/adidasWallpaper.jpg';
     
     // Cloth simulation parameters
     const SEGMENTS_X = 32; // Number of horizontal segments

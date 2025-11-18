@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "optimize-glb": "node optimize-glb.js"
   },
   "keywords": [
     "three.js",
@@ -20,6 +21,9 @@
     "three": "^0.160.0"
   },
   "devDependencies": {
+    "@gltf-transform/cli": "^4.2.1",
+    "@gltf-transform/core": "^4.2.1",
+    "@gltf-transform/extensions": "^4.2.1",
     "patch-package": "^8.0.1",
     "vite": "^5.0.0"
   }
