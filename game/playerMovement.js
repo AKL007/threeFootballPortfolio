@@ -111,7 +111,6 @@ function updatePlayerAnimation(player, isMoving, speed, forceAnimation = null) {
     
     // Switch animation if needed
     if (currentAction?.getClip().name !== targetAnimation) {
-        // console.log('switching animation to', targetAnimation);
         switchAnimation(targetAnimation);
     }
 }
@@ -165,6 +164,9 @@ export function updatePlayerMovement(delta, player, ball) {
         const smoothingFactor = PLAYER_MOVEMENT.INPUT_SMOOTHING * delta;
         gameState.currentInputDirection.lerp(new THREE.Vector3(0, 0, 0), Math.min(smoothingFactor, 1));
     }
+
+    if(Math.abs(gameState.currentInputDirection.x) < 0.01) gameState.currentInputDirection.x = 0;
+    if(Math.abs(gameState.currentInputDirection.z) < 0.01) gameState.currentInputDirection.z = 0;
     
     // Use the smoothed direction for movement calculations
     const direction = gameState.currentInputDirection.clone();

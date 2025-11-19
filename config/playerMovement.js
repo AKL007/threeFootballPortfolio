@@ -11,10 +11,10 @@ export const PLAYER_MOVEMENT = {
     DECELERATION: 8, // m/s² - deceleration rate (faster than acceleration)
     
     // Rotation
-    ROTATION_SPEED: 8, // radians per second
+    ROTATION_SPEED: 2, // radians per second
     
     // Input smoothing (for analog-like joystick behavior)
-    INPUT_SMOOTHING: 2, // How fast input direction interpolates (higher = more responsive)
+    INPUT_SMOOTHING: 8, // How fast input direction interpolates (higher = more responsive)
     
     // Animation thresholds
     JOG_THRESHOLD: 4.5, // m/s - threshold between jog and run animation
