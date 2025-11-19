@@ -14,6 +14,7 @@ export const BALL_PHYSICS = {
     // Bounce physics
     BOUNCE_ENERGY_RETENTION: 0.6, // 60% energy retention on bounce
     HORIZONTAL_VELOCITY_REDUCTION: 0.9, // Horizontal velocity reduction on bounce
+    WALL_BOUNCE_ENERGY_RETENTION: 0.5, // Energy retention when bouncing off walls
     
     // Friction
     GROUND_FRICTION: 0.95, // Ground friction multiplier per frame

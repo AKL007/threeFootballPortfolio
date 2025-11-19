@@ -46,6 +46,7 @@ setupLighting(scene);
 // const stadium = await createStadium();
 const stadium = createStadium(scene);
 scene.add(stadium);
+gameState.invisibleWalls = stadium.userData.invisibleWalls || [];
 
 let player = null;
 let playerMixer = null;

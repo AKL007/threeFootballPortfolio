@@ -9,6 +9,7 @@ import { createScoreboard } from './scoreboard.js';
 import { createDugout } from './dugout.js';
 import { createTreeCluster } from './trees.js';
 import { STADIUM_COLORS } from '../config/colors.js';
+import { createInvisibleWall } from './invisibleWalls.js';
 
 /**
  * Creates and returns a fully decorated 3D stadium for use with Three.js.
@@ -16,6 +17,12 @@ import { STADIUM_COLORS } from '../config/colors.js';
  */
 export function createStadium(helperParent = null) {
     const stadiumGroup = new THREE.Group();
+    const invisibleWalls = [];
+
+    const addInvisibleWall = (wall) => {
+        invisibleWalls.push(wall);
+        stadiumGroup.add(wall);
+    };
 
     // ----- Ground Plane -----
     // Large flat ground plane on which everything sits.
@@ -35,14 +42,14 @@ export function createStadium(helperParent = null) {
     stadiumGroup.add(ground);
 
     // ----- Extended Grass Area (under stands) -----
-    const fieldWidth = 110;
-    const fieldHeight = 70;
-    const extendedGrass = createExtendedGrassArea(fieldWidth, fieldHeight, 10);
+    const fieldLength = 110;
+    const fieldWidth = 70;
+    const extendedGrass = createExtendedGrassArea(fieldLength, fieldWidth, 10);
     stadiumGroup.add(extendedGrass);
 
     // ----- Grass Field -----
     // Realistic grass field (imported/shader-based).
-    const grassField = createGrassField(fieldWidth, fieldHeight, 'instanced', {density: 400});
+    const grassField = createGrassField(fieldLength, fieldWidth, 'instanced', {density: 400});
     stadiumGroup.add(grassField);
     stadiumGroup.userData.grassField = grassField; // Reference for animation.
 
@@ -94,6 +101,14 @@ export function createStadium(helperParent = null) {
         stadiumGroup.add(createTreeCluster(-105, i, 10, 20));
     stadiumGroup.add(createTreeCluster(105, i, 10, 20));
     }
+
+    // ----- Invisble Walls -----
+    addInvisibleWall(createInvisibleWall(-fieldLength / 2 - 10, 0, 70 + 20, 0));
+    addInvisibleWall(createInvisibleWall(fieldLength / 2 + 10, 0, 70 + 20, Math.PI));
+    addInvisibleWall(createInvisibleWall(0, -fieldWidth / 2 - 10, 110 + 20, Math.PI / 2));
+    addInvisibleWall(createInvisibleWall(0, fieldWidth / 2 + 10, 110 + 20, -Math.PI / 2));
+
+    stadiumGroup.userData.invisibleWalls = invisibleWalls;
 
     return stadiumGroup;
 }

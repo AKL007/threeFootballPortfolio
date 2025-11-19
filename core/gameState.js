@@ -24,6 +24,7 @@ export const gameState = {
     scrollStartPos: null,
     scrollStartLookAt: null,
     scrollEndPos: null,
-    scrollEndLookAt: null
+    scrollEndLookAt: null,
+    invisibleWalls: []
 };
 
