@@ -132,26 +132,43 @@ export function updatePlayerMovement(delta, player, ball) {
     const acceleration = PLAYER_MOVEMENT.ACCELERATION;
     const deceleration = PLAYER_MOVEMENT.DECELERATION;
     
-    const direction = new THREE.Vector3();
+    // Compute target direction from key presses (discrete input)
+    const targetDirection = new THREE.Vector3();
     let isMoving = false;
     
     // Movement with arrow keys only
     if (gameState.keys['ArrowUp']) {
-        direction.z -= 1;
+        targetDirection.z -= 1;
         isMoving = true;
     }
     if (gameState.keys['ArrowDown']) {
-        direction.z += 1;
+        targetDirection.z += 1;
         isMoving = true;
     }
     if (gameState.keys['ArrowLeft']) {
-        direction.x -= 1;
+        targetDirection.x -= 1;
         isMoving = true;
     }
     if (gameState.keys['ArrowRight']) {
-        direction.x += 1;
+        targetDirection.x += 1;
         isMoving = true;
     }
+    
+    // Smoothly interpolate current input direction toward target direction
+    // This creates analog-like behavior with continuous angles, not just 8 directions
+    if (targetDirection.length() > 0) {
+        targetDirection.normalize();
+        const smoothingFactor = PLAYER_MOVEMENT.INPUT_SMOOTHING * delta;
+        gameState.currentInputDirection.lerp(targetDirection, Math.min(smoothingFactor, 1));
+    } else {
+        // When no keys are pressed, smoothly return to zero
+        const smoothingFactor = PLAYER_MOVEMENT.INPUT_SMOOTHING * delta;
+        gameState.currentInputDirection.lerp(new THREE.Vector3(0, 0, 0), Math.min(smoothingFactor, 1));
+    }
+    
+    // Use the smoothed direction for movement calculations
+    const direction = gameState.currentInputDirection.clone();
+    isMoving = direction.length() > 0.01; // Small threshold to prevent jitter
     
     // Ball actions with power charging
     let initiatedAction = false;

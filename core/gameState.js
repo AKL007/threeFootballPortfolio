@@ -25,6 +25,7 @@ export const gameState = {
     scrollStartLookAt: null,
     scrollEndPos: null,
     scrollEndLookAt: null,
-    invisibleWalls: []
+    invisibleWalls: [],
+    currentInputDirection: new THREE.Vector3() // Smoothed input direction for analog-like movement
 };
 
