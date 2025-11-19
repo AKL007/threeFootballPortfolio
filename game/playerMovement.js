@@ -47,6 +47,11 @@ function switchAnimation(animationName, fadeTime = PLAYER_MOVEMENT.ANIMATION_FAD
     // Fade out current animation
     if (currentAction) {
         currentAction.fadeOut(fadeTime);
+        // Stop the animation if it's a one-time animation that has finished
+        if (currentAction.getClip().name === ANIMATIONS.SOCCER_PASS && 
+            currentAction.time >= currentAction.getClip().duration - 0.1) {
+            currentAction.stop();
+        }
     }
     
     // Fade in new animation
@@ -69,9 +74,16 @@ function updatePlayerAnimation(player, isMoving, speed, forceAnimation = null) {
         const currentClipName = currentAction.getClip().name;
         const isPassAnimation = currentClipName === ANIMATIONS.SOCCER_PASS;
         
-        if (isPassAnimation && !currentAction.paused && currentAction.time < currentAction.getClip().duration - 0.1) {
-            // Pass animation is still playing, don't switch
-            return;
+        if (isPassAnimation) {
+            // Check if pass animation has finished
+            const hasFinished = currentAction.time >= currentAction.getClip().duration - 0.1 || 
+                               (currentAction.paused && currentAction.time > 0);
+            
+            if (!hasFinished) {
+                // Pass animation is still playing, don't switch
+                return;
+            }
+            // If it has finished, allow the animation to switch below
         }
     }
     
@@ -99,6 +111,7 @@ function updatePlayerAnimation(player, isMoving, speed, forceAnimation = null) {
     
     // Switch animation if needed
     if (currentAction?.getClip().name !== targetAnimation) {
+        // console.log('switching animation to', targetAnimation);
         switchAnimation(targetAnimation);
     }
 }
@@ -141,7 +154,7 @@ export function updatePlayerMovement(delta, player, ball) {
     }
     
     // Ball actions with power charging
-    let actionPerformed = false;
+    let initiatedAction = false;
     const CHARGE_RATE = PLAYER_MOVEMENT.CHARGE_RATE;
     const MAX_POWER = PLAYER_MOVEMENT.MAX_POWER;
     
@@ -178,23 +191,19 @@ export function updatePlayerMovement(delta, player, ball) {
         
         if (!keyHeld) {
             // Key released - execute action if power is sufficient
-            if (gameState.actionPower > PLAYER_MOVEMENT.MIN_POWER_TO_EXECUTE) {
-                let executed = false;
-                if (gameState.currentActionType === 'pass') {
-                    executed = passBall(player, ball, gameState.actionPower);
-                } else if (gameState.currentActionType === 'through') {
-                    executed = throughPass(player, ball, gameState.actionPower);
-                } else if (gameState.currentActionType === 'lob') {
-                    executed = lobPass(player, ball, gameState.actionPower);
-                } else if (gameState.currentActionType === 'shoot') {
-                    executed = shootBall(player, ball, gameState.actionPower);
-                }
-                
-                if (executed) {
-                    actionPerformed = true;
-                }
+            const actionType = gameState.currentActionType;
+            const validActions = ['pass', 'through', 'lob', 'shoot'];
+
+            if (
+                gameState.actionPower > PLAYER_MOVEMENT.MIN_POWER_TO_EXECUTE &&
+                validActions.includes(actionType)
+            ) {
+                gameState.pendingAction = actionType;
+                initiatedAction = true;
+                gameState.pendingActionPower = gameState.actionPower;
+                gameState.pendingAnimation = ANIMATIONS.SOCCER_PASS;
             }
-            
+
             // Reset charging state
             gameState.isChargingAction = false;
             gameState.currentActionType = null;
@@ -202,18 +211,23 @@ export function updatePlayerMovement(delta, player, ball) {
         }
     }
     
-    // Play pass animation when action is performed
-    if (actionPerformed) {
-        const passAction = animationActions[ANIMATIONS.SOCCER_PASS];
-        if (passAction) {
-            // Play pass animation once (not looped)
-            passAction.setLoop(THREE.LoopOnce);
-            passAction.reset().play();
-            passAction.clampWhenFinished = true;
-            currentAction = passAction;
+    // Simplified animation trigger for pending action
+    if (initiatedAction || gameState.pendingAnimation) {
+        const pendingAnim = gameState.pendingAnimation;
+        const animAction = animationActions[pendingAnim];
+        if (animAction) {
+            if (currentAction && currentAction !== animAction) currentAction.fadeOut(0.1);
+            animAction
+                .setLoop(THREE.LoopOnce)
+                .reset()
+                .fadeIn(0.1)
+                .play();
+            animAction.clampWhenFinished = true;
+            currentAction = animAction;
         }
+        gameState.pendingAnimation = null;
     }
-    
+
     if (gameState.penaltyMode) {
         // Penalty mode controls
         if (gameState.keys['ArrowUp']) gameState.penaltyDirection.y += PENALTY.DIRECTION_STEP;
@@ -238,7 +252,19 @@ export function updatePlayerMovement(delta, player, ball) {
     // Update player animation based on movement
     const movementSpeed = gameState.playerVelocity.length();
     updatePlayerAnimation(player, isMoving, movementSpeed);
-    
+
+    // Execute shoot action if it has been initiated and the pass animation is 33% complete
+    if (
+        gameState.pendingAction &&
+        currentAction?.getClip().name === ANIMATIONS.SOCCER_PASS &&
+        currentAction.time >= currentAction.getClip().duration * 0.33
+    ) {
+        if (shootBall(player, ball, gameState.pendingActionPower)) {
+            initiatedAction = false;
+            gameState.pendingAction = null;
+        }
+    }
+
     if (isMoving) {
         // Normalize direction to get the desired movement direction (in world space)
         direction.normalize();
