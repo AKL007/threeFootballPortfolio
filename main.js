@@ -111,7 +111,7 @@ function animate() {
         }
         
         updatePlayerMovement(delta, player, ball);
-        updateCamera(delta, camera, player);
+        updateCamera(delta, camera, player, ball);
         updateUI(player);
     }
     

@@ -18,7 +18,9 @@ export const CAMERA = {
     FOLLOW: {
         LERP_SPEED: 0.1, // Camera position lerp speed
         LOOK_AT_LERP_SPEED: 0.15, // Camera look-at lerp speed
-        FIXED_OFFSET: new THREE.Vector3(0, 10, 15), // Behind and above player
+        FIXED_OFFSET: new THREE.Vector3(0, 20, 35), // Behind and above player
+        FIXED_POSITION: new THREE.Vector3(0, 20, 30), // On the sideline
+        ZOOM: 2, // Camera zoom level
     },
     
     // Zoom mode
