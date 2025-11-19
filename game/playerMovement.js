@@ -276,9 +276,18 @@ export function updatePlayerMovement(delta, player, ball) {
         currentAction?.getClip().name === ANIMATIONS.SOCCER_PASS &&
         currentAction.time >= currentAction.getClip().duration * 0.33
     ) {
-        if (shootBall(player, ball, gameState.pendingActionPower)) {
+        const actionMap = {
+            shoot: shootBall,
+            through: throughPass,
+            lob: lobPass,
+            pass: passBall
+        };
+
+        const actionFunc = actionMap[gameState.pendingAction];
+        if (actionFunc && actionFunc(player, gameState.pendingActionPower)) {
             initiatedAction = false;
             gameState.pendingAction = null;
+            gameState.pendingActionPower = 0;
         }
     }
 

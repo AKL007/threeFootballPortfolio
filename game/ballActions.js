@@ -48,8 +48,40 @@ function getPassDirection(player, aheadDistance = 0) {
     return forward;
 }
 
+function getShootDirection(player, power = 1.0) {
+    let forward = new THREE.Vector3(0, 0, 1); // Player's forward direction
+    forward.applyQuaternion(player.quaternion);
+    
+    const currentInputDirection = gameState.currentInputDirection.normalize();
+
+    let goalDirection = new THREE.Vector3(0, 0, 1);
+    if (currentInputDirection.x > 0) {
+        let goalPosition = new THREE.Vector3(55, 0, 0);
+        goalDirection = goalPosition.clone().sub(player.position).normalize();
+    } else {
+        let goalPosition = new THREE.Vector3(-55, 0, 0);
+        goalDirection = goalPosition.clone().sub(player.position).normalize();
+    }
+
+    // add noise to goalDirection as power increases
+    let noise_z = Math.pow(power, 2) * 0.33 * (currentInputDirection.z > 0 ? 1 : -1)
+    let noise = new THREE.Vector3(0, 0, noise_z)
+    console.log('power', power);
+    console.log('noise', noise);
+    goalDirection.add(noise);
+    
+    forward.lerp(currentInputDirection, BALL_ACTIONS.DIRECTION.MOVEMENT_BLEND_FACTOR);
+    forward.lerp(goalDirection, BALL_ACTIONS.DIRECTION.MOVEMENT_BLEND_FACTOR);
+    
+    forward.normalize();
+
+    console.log('forward**', forward);
+    
+    return forward;
+}
+
 // Pass the ball
-export function passBall(player, ball, power = 1.0) {
+export function passBall(player, power = 1.0) {
     if (!canPerformAction()) return false;
     
     const passDirection = getPassDirection(player);
@@ -69,7 +101,7 @@ export function passBall(player, ball, power = 1.0) {
 }
 
 // Through pass (pass ahead)
-export function throughPass(player, ball, power = 1.0) {
+export function throughPass(player, power = 1.0) {
     if (!canPerformAction()) return false;
     
     const passDirection = getPassDirection(player, BALL_ACTIONS.THROUGH_PASS.AHEAD_DISTANCE);
@@ -89,7 +121,7 @@ export function throughPass(player, ball, power = 1.0) {
 }
 
 // Lob pass (high arc)
-export function lobPass(player, ball, power = 1.0) {
+export function lobPass(player, power = 1.0) {
     if (!canPerformAction()) return false;
     
     const passDirection = getPassDirection(player);
@@ -113,10 +145,10 @@ export function lobPass(player, ball, power = 1.0) {
 }
 
 // Shoot the ball
-export function shootBall(player, ball, power = 1.0) {
+export function shootBall(player, power = 1.0) {
     if (!canPerformAction()) return false;
     
-    const shootDirection = getPassDirection(player);
+    const shootDirection = getShootDirection(player, power);
     const shootSpeed = BALL_ACTIONS.SHOOT.BASE_SPEED + (BALL_ACTIONS.SHOOT.MAX_SPEED - BALL_ACTIONS.SHOOT.BASE_SPEED) * power;
     const shootAngle = BALL_ACTIONS.SHOOT.ANGLE_BASE + BALL_ACTIONS.SHOOT.ANGLE_POWER_MULTIPLIER * power;
     const shootAngleRad = shootAngle * (Math.PI / 180);
