@@ -10,6 +10,7 @@ import { createDugout } from './dugout.js';
 import { createTreeCluster } from './trees.js';
 import { STADIUM_COLORS } from '../config/colors.js';
 import { createInvisibleWall } from './invisibleWalls.js';
+import { gameState } from '../core/gameState.js';
 
 /**
  * Creates and returns a fully decorated 3D stadium for use with Three.js.
@@ -18,6 +19,7 @@ import { createInvisibleWall } from './invisibleWalls.js';
 export function createStadium(helperParent = null) {
     const stadiumGroup = new THREE.Group();
     const invisibleWalls = [];
+    gameState.goalNets = [];
 
     const addInvisibleWall = (wall) => {
         invisibleWalls.push(wall);

@@ -1,5 +1,13 @@
+import * as THREE from 'three';
 import { gameState } from '../core/gameState.js';
 import { BALL_PHYSICS } from '../config/ballPhysics.js';
+
+const netLocalNormal = new THREE.Vector3(0, 0, 1);
+const planeNormal = new THREE.Vector3();
+const worldQuaternion = new THREE.Quaternion();
+const normalComponent = new THREE.Vector3();
+const tangentialComponent = new THREE.Vector3();
+const localBallPosition = new THREE.Vector3();
 
 function handleInvisibleWallCollisions(ball) {
     if (!gameState.invisibleWalls?.length) {
@@ -34,6 +42,53 @@ function handleInvisibleWallCollisions(ball) {
     }
 }
 
+function handleNetCollisions(ball) {
+    if (!gameState.goalNets?.length) {
+        return;
+    }
+
+    for (const net of gameState.goalNets) {
+        const mesh = net?.mesh;
+        if (!mesh) {
+            continue;
+        }
+
+        mesh.updateMatrixWorld(true);
+        mesh.getWorldQuaternion(worldQuaternion);
+
+        planeNormal.copy(netLocalNormal).applyQuaternion(worldQuaternion).normalize();
+
+        localBallPosition.copy(ball.position);
+        mesh.worldToLocal(localBallPosition);
+
+        const radius = BALL_PHYSICS.RADIUS;
+        const halfWidth = net.halfWidth ?? radius;
+        const halfHeight = net.halfHeight ?? radius;
+
+        const withinX = localBallPosition.x >= -halfWidth - radius && localBallPosition.x <= halfWidth + radius;
+        const withinY = localBallPosition.y >= -halfHeight - radius && localBallPosition.y <= halfHeight + radius;
+        const penetrationDepth = radius - localBallPosition.z;
+
+        if (withinX && withinY && penetrationDepth > 0 && localBallPosition.z >= -radius) {
+            ball.position.addScaledVector(planeNormal, penetrationDepth);
+
+            const velocity = gameState.ballVelocity;
+            const velocityAlongNormal = velocity.dot(planeNormal);
+
+            if (velocityAlongNormal < 0) {
+                normalComponent.copy(planeNormal).multiplyScalar(velocityAlongNormal);
+                tangentialComponent.copy(velocity).sub(normalComponent);
+
+                const bounceMagnitude = -velocityAlongNormal * BALL_PHYSICS.NET_BOUNCE_ENERGY_RETENTION;
+                normalComponent.copy(planeNormal).multiplyScalar(bounceMagnitude);
+                tangentialComponent.multiplyScalar(BALL_PHYSICS.NET_TANGENTIAL_ENERGY_RETENTION);
+
+                velocity.copy(normalComponent).add(tangentialComponent);
+            }
+        }
+    }
+}
+
 export function updateBall(delta, ball) {
     // Apply gravity
     gameState.ballVelocity.y -= BALL_PHYSICS.GRAVITY * delta;
@@ -62,6 +117,7 @@ export function updateBall(delta, ball) {
     }
     // No friction when ball is in air - only gravity affects it
     
+    handleNetCollisions(ball);
     handleInvisibleWallCollisions(ball);
 
     // Stop very slow movement

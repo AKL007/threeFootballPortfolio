@@ -54,8 +54,10 @@ function getShootDirection(player, power = 1.0) {
     
     const currentInputDirection = gameState.currentInputDirection.normalize();
 
+    forward.lerp(currentInputDirection, BALL_ACTIONS.DIRECTION.MOVEMENT_BLEND_FACTOR);
+
     let goalDirection = new THREE.Vector3(0, 0, 1);
-    if (currentInputDirection.x > 0) {
+    if (forward.x > 0) {
         let goalPosition = new THREE.Vector3(55, 0, 0);
         goalDirection = goalPosition.clone().sub(player.position).normalize();
     } else {
@@ -64,11 +66,11 @@ function getShootDirection(player, power = 1.0) {
     }
 
     // add noise to goalDirection as power increases
-    let noise_z = Math.pow(power, 2) * 0.33 * (currentInputDirection.z > 0 ? 1 : -1)
+    let noise_z = Math.pow(power, 2) * (Math.random() * 0.33) * (currentInputDirection.z > 0 ? 1 : -1)
     let noise = new THREE.Vector3(0, 0, noise_z)
     goalDirection.add(noise);
     
-    forward.lerp(currentInputDirection, BALL_ACTIONS.DIRECTION.MOVEMENT_BLEND_FACTOR);
+    
     forward.lerp(goalDirection, BALL_ACTIONS.DIRECTION.MOVEMENT_BLEND_FACTOR);
     
     forward.normalize();
