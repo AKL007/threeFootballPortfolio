@@ -95,10 +95,10 @@ export function updateFlyCamera(delta, camera) {
     camera.quaternion.setFromEuler(gameState.flyCameraEuler);
 }
 
-export function updateCamera(delta, camera, player) {
+export function updateCamera(delta, camera, player, ball) {
     // Scroll mode takes priority (when scrolling through the page)
     if (gameState.scrollMode) {
-        // Scroll camera is updated by scroll event, not here
+    // Scroll camera is updated by scroll event, not here
         return;
     }
     
@@ -141,13 +141,14 @@ export function updateCamera(delta, camera, player) {
     
     // FIFA-style fixed camera: fixed angle, follows player position but doesn't rotate with player
     // Camera positioned behind and above player, looking down at an angle
-    const targetPos = player.position.clone().add(CAMERA.FOLLOW.FIXED_OFFSET);
+    // const targetPos = player.position.clone().add(CAMERA.FOLLOW.FIXED_OFFSET);
+    const targetPos = CAMERA.FOLLOW.FIXED_POSITION;
     
     // Smoothly follow player position
     camera.position.lerp(targetPos, CAMERA.FOLLOW.LERP_SPEED);
     
     // Always look at player position
-    const targetLookAt = player.position.clone();
+    const targetLookAt = player.position.clone().lerp(ball.position, 0.5);
     
     // Initialize current look-at if not set
     if (!gameState.currentLookAt) {
@@ -157,5 +158,8 @@ export function updateCamera(delta, camera, player) {
     // Smoothly interpolate look-at target to prevent warping
     gameState.currentLookAt.lerp(targetLookAt, CAMERA.FOLLOW.LOOK_AT_LERP_SPEED);
     camera.lookAt(gameState.currentLookAt);
+    // Fix: set camera's .zoom property instead of calling .zoom() (which does not exist)
+    camera.zoom = CAMERA.FOLLOW.ZOOM;
+    camera.updateProjectionMatrix();
 }
 

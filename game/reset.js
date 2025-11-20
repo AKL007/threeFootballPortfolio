@@ -41,6 +41,8 @@ export function resetGameState(player, ball) {
     if (gameState.currentLookAt) {
         gameState.currentLookAt.set(0, 0, 0);
     }
+
+    gameState.justScored = false;
     
     console.log('Game state reset');
 }

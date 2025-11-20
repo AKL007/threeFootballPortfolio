@@ -46,6 +46,14 @@ setupLighting(scene);
 // const stadium = await createStadium();
 const stadium = createStadium(scene);
 scene.add(stadium);
+gameState.invisibleWalls = stadium.userData.invisibleWalls || [];
+
+// Store scoreboard reference in gameState for event-based updates
+stadium.traverse((child) => {
+    if (child.userData.updateScore) {
+        gameState.scoreboardScreen = child;
+    }
+});
 
 let player = null;
 let playerMixer = null;
@@ -110,7 +118,7 @@ function animate() {
         }
         
         updatePlayerMovement(delta, player, ball);
-        updateCamera(delta, camera, player);
+        updateCamera(delta, camera, player, ball);
         updateUI(player);
     }
     

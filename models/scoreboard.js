@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { SCOREBOARD_COLORS } from '../config/colors.js';
+import { gameState } from '../core/gameState.js';
 
 /**
  * Creates a scoreboard screen (for 'Projects') with canvas texture.
@@ -31,49 +32,62 @@ export function createScoreboard() {
     scoreboardCanvas.width = 1600/2;
     scoreboardCanvas.height = 900/2;
     const scoreboardCtx = scoreboardCanvas.getContext('2d');
-    // Background
-    scoreboardCtx.fillStyle = SCOREBOARD_COLORS.BACKGROUND;
-    scoreboardCtx.fillRect(0, 0, scoreboardCanvas.width, scoreboardCanvas.height);
+    const scoreboardTexture = new THREE.CanvasTexture(scoreboardCanvas);
 
-    // Draw a gray rectangle boundary (stroke)
-    scoreboardCtx.strokeStyle = SCOREBOARD_COLORS.BORDER;
-    scoreboardCtx.lineWidth = 10;
-    scoreboardCtx.strokeRect(
-        5, 
-        5, 
-        scoreboardCanvas.width - 10, 
-        scoreboardCanvas.height - 10
-    );
+    // Function to draw/redraw the scoreboard
+    function drawScoreboard() {
+        // Clear and redraw background
+        scoreboardCtx.fillStyle = SCOREBOARD_COLORS.BACKGROUND;
+        scoreboardCtx.fillRect(0, 0, scoreboardCanvas.width, scoreboardCanvas.height);
 
-    // Title: Home : Away
-    scoreboardCtx.fillStyle = SCOREBOARD_COLORS.HOME_COLOR;
-    scoreboardCtx.font = 'bold 60px Arial';
-    scoreboardCtx.textAlign = 'center';
-    scoreboardCtx.fillText('HOME', scoreboardCanvas.width / 4, 100);
-    
-    scoreboardCtx.fillStyle = SCOREBOARD_COLORS.AWAY_COLOR;
-    scoreboardCtx.font = 'bold 60px Arial';
-    scoreboardCtx.textAlign = 'center';
-    scoreboardCtx.fillText('AWAY', scoreboardCanvas.width * 3 / 4, 100);
+        // Draw a gray rectangle boundary (stroke)
+        scoreboardCtx.strokeStyle = SCOREBOARD_COLORS.BORDER;
+        scoreboardCtx.lineWidth = 10;
+        scoreboardCtx.strokeRect(
+            5, 
+            5, 
+            scoreboardCanvas.width - 10, 
+            scoreboardCanvas.height - 10
+        );
 
-    // Score: 3 : 2
-    scoreboardCtx.fillStyle = SCOREBOARD_COLORS.SCORE;
-    scoreboardCtx.font = 'bold 170px Arial';
-    scoreboardCtx.fillText('3  :  2', scoreboardCanvas.width / 2, 300);
+        // Title: Home : Away
+        scoreboardCtx.fillStyle = SCOREBOARD_COLORS.HOME_COLOR;
+        scoreboardCtx.font = 'bold 60px Arial';
+        scoreboardCtx.textAlign = 'center';
+        scoreboardCtx.fillText('HOME', scoreboardCanvas.width / 4, 100);
+        
+        scoreboardCtx.fillStyle = SCOREBOARD_COLORS.AWAY_COLOR;
+        scoreboardCtx.font = 'bold 60px Arial';
+        scoreboardCtx.textAlign = 'center';
+        scoreboardCtx.fillText('AWAY', scoreboardCanvas.width * 3 / 4, 100);
 
-    // Optional: Add a subtle "FULL TIME" label below the scores (optional)
-    scoreboardCtx.fillStyle = SCOREBOARD_COLORS.LABEL;
-    scoreboardCtx.font = '40px Arial';
-    scoreboardCtx.fillText('FULL TIME', scoreboardCanvas.width / 2, 400);
+        // Score: Home : Away (updates with current gameState values)
+        scoreboardCtx.fillStyle = SCOREBOARD_COLORS.SCORE;
+        scoreboardCtx.font = 'bold 170px Arial';
+        scoreboardCtx.fillText(gameState.homeScore + '  :  ' + gameState.awayScore, scoreboardCanvas.width / 2, 300);
 
+        // Optional: Add a subtle "FULL TIME" label below the scores (optional)
+        scoreboardCtx.fillStyle = SCOREBOARD_COLORS.LABEL;
+        scoreboardCtx.font = '40px Arial';
+        scoreboardCtx.fillText('FULL TIME', scoreboardCanvas.width / 2, 400);
+
+        // Mark texture as needing update
+        scoreboardTexture.needsUpdate = true;
+    }
+
+    // Initial draw
+    drawScoreboard();
 
     const screen = new THREE.Mesh(
         screenGeometry, 
-        new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(scoreboardCanvas), flatShading: true })
+        new THREE.MeshBasicMaterial({ map: scoreboardTexture, flatShading: true })
     );
     screen.position.set(66, 12, -46);
     screen.rotateOnAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 4);
     pillarGroup.add(screen);
+
+    // Store update function in userData for event-based updates
+    screen.userData.updateScore = drawScoreboard;
 
     return pillarGroup;
     

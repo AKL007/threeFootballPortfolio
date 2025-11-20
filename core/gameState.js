@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 
 export const gameState = {
+    justScored: false,
+    homeScore: 0,
+    awayScore: 0,
     keys: {},
     playerVelocity: new THREE.Vector3(),
     ballVelocity: new THREE.Vector3(),
@@ -24,6 +27,9 @@ export const gameState = {
     scrollStartPos: null,
     scrollStartLookAt: null,
     scrollEndPos: null,
-    scrollEndLookAt: null
+    scrollEndLookAt: null,
+    invisibleWalls: [],
+    goalNets: [],
+    currentInputDirection: new THREE.Vector3() // Smoothed input direction for analog-like movement
 };
 

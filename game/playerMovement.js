@@ -47,6 +47,11 @@ function switchAnimation(animationName, fadeTime = PLAYER_MOVEMENT.ANIMATION_FAD
     // Fade out current animation
     if (currentAction) {
         currentAction.fadeOut(fadeTime);
+        // Stop the animation if it's a one-time animation that has finished
+        if (currentAction.getClip().name === ANIMATIONS.SOCCER_PASS && 
+            currentAction.time >= currentAction.getClip().duration - 0.1) {
+            currentAction.stop();
+        }
     }
     
     // Fade in new animation
@@ -69,9 +74,16 @@ function updatePlayerAnimation(player, isMoving, speed, forceAnimation = null) {
         const currentClipName = currentAction.getClip().name;
         const isPassAnimation = currentClipName === ANIMATIONS.SOCCER_PASS;
         
-        if (isPassAnimation && !currentAction.paused && currentAction.time < currentAction.getClip().duration - 0.1) {
-            // Pass animation is still playing, don't switch
-            return;
+        if (isPassAnimation) {
+            // Check if pass animation has finished
+            const hasFinished = currentAction.time >= currentAction.getClip().duration - 0.1 || 
+                               (currentAction.paused && currentAction.time > 0);
+            
+            if (!hasFinished) {
+                // Pass animation is still playing, don't switch
+                return;
+            }
+            // If it has finished, allow the animation to switch below
         }
     }
     
@@ -119,29 +131,49 @@ export function updatePlayerMovement(delta, player, ball) {
     const acceleration = PLAYER_MOVEMENT.ACCELERATION;
     const deceleration = PLAYER_MOVEMENT.DECELERATION;
     
-    const direction = new THREE.Vector3();
+    // Compute target direction from key presses (discrete input)
+    const targetDirection = new THREE.Vector3();
     let isMoving = false;
     
     // Movement with arrow keys only
     if (gameState.keys['ArrowUp']) {
-        direction.z -= 1;
+        targetDirection.z -= 1;
         isMoving = true;
     }
     if (gameState.keys['ArrowDown']) {
-        direction.z += 1;
+        targetDirection.z += 1;
         isMoving = true;
     }
     if (gameState.keys['ArrowLeft']) {
-        direction.x -= 1;
+        targetDirection.x -= 1;
         isMoving = true;
     }
     if (gameState.keys['ArrowRight']) {
-        direction.x += 1;
+        targetDirection.x += 1;
         isMoving = true;
     }
     
+    // Smoothly interpolate current input direction toward target direction
+    // This creates analog-like behavior with continuous angles, not just 8 directions
+    if (targetDirection.length() > 0) {
+        targetDirection.normalize();
+        const smoothingFactor = PLAYER_MOVEMENT.INPUT_SMOOTHING * delta;
+        gameState.currentInputDirection.lerp(targetDirection, Math.min(smoothingFactor, 1));
+    } else {
+        // When no keys are pressed, smoothly return to zero
+        const smoothingFactor = PLAYER_MOVEMENT.INPUT_SMOOTHING * delta;
+        gameState.currentInputDirection.lerp(new THREE.Vector3(0, 0, 0), Math.min(smoothingFactor, 1));
+    }
+
+    if(Math.abs(gameState.currentInputDirection.x) < 0.01) gameState.currentInputDirection.x = 0;
+    if(Math.abs(gameState.currentInputDirection.z) < 0.01) gameState.currentInputDirection.z = 0;
+    
+    // Use the smoothed direction for movement calculations
+    const direction = gameState.currentInputDirection.clone();
+    isMoving = direction.length() > 0.01; // Small threshold to prevent jitter
+    
     // Ball actions with power charging
-    let actionPerformed = false;
+    let initiatedAction = false;
     const CHARGE_RATE = PLAYER_MOVEMENT.CHARGE_RATE;
     const MAX_POWER = PLAYER_MOVEMENT.MAX_POWER;
     
@@ -178,23 +210,19 @@ export function updatePlayerMovement(delta, player, ball) {
         
         if (!keyHeld) {
             // Key released - execute action if power is sufficient
-            if (gameState.actionPower > PLAYER_MOVEMENT.MIN_POWER_TO_EXECUTE) {
-                let executed = false;
-                if (gameState.currentActionType === 'pass') {
-                    executed = passBall(player, ball, gameState.actionPower);
-                } else if (gameState.currentActionType === 'through') {
-                    executed = throughPass(player, ball, gameState.actionPower);
-                } else if (gameState.currentActionType === 'lob') {
-                    executed = lobPass(player, ball, gameState.actionPower);
-                } else if (gameState.currentActionType === 'shoot') {
-                    executed = shootBall(player, ball, gameState.actionPower);
-                }
-                
-                if (executed) {
-                    actionPerformed = true;
-                }
+            const actionType = gameState.currentActionType;
+            const validActions = ['pass', 'through', 'lob', 'shoot'];
+
+            if (
+                gameState.actionPower > PLAYER_MOVEMENT.MIN_POWER_TO_EXECUTE &&
+                validActions.includes(actionType)
+            ) {
+                gameState.pendingAction = actionType;
+                initiatedAction = true;
+                gameState.pendingActionPower = gameState.actionPower;
+                gameState.pendingAnimation = ANIMATIONS.SOCCER_PASS;
             }
-            
+
             // Reset charging state
             gameState.isChargingAction = false;
             gameState.currentActionType = null;
@@ -202,18 +230,23 @@ export function updatePlayerMovement(delta, player, ball) {
         }
     }
     
-    // Play pass animation when action is performed
-    if (actionPerformed) {
-        const passAction = animationActions[ANIMATIONS.SOCCER_PASS];
-        if (passAction) {
-            // Play pass animation once (not looped)
-            passAction.setLoop(THREE.LoopOnce);
-            passAction.reset().play();
-            passAction.clampWhenFinished = true;
-            currentAction = passAction;
+    // Simplified animation trigger for pending action
+    if (initiatedAction || gameState.pendingAnimation) {
+        const pendingAnim = gameState.pendingAnimation;
+        const animAction = animationActions[pendingAnim];
+        if (animAction) {
+            if (currentAction && currentAction !== animAction) currentAction.fadeOut(0.1);
+            animAction
+                .setLoop(THREE.LoopOnce)
+                .reset()
+                .fadeIn(0.1)
+                .play();
+            animAction.clampWhenFinished = true;
+            currentAction = animAction;
         }
+        gameState.pendingAnimation = null;
     }
-    
+
     if (gameState.penaltyMode) {
         // Penalty mode controls
         if (gameState.keys['ArrowUp']) gameState.penaltyDirection.y += PENALTY.DIRECTION_STEP;
@@ -238,7 +271,28 @@ export function updatePlayerMovement(delta, player, ball) {
     // Update player animation based on movement
     const movementSpeed = gameState.playerVelocity.length();
     updatePlayerAnimation(player, isMoving, movementSpeed);
-    
+
+    // Execute shoot action if it has been initiated and the pass animation is 33% complete
+    if (
+        gameState.pendingAction &&
+        currentAction?.getClip().name === ANIMATIONS.SOCCER_PASS &&
+        currentAction.time >= currentAction.getClip().duration * 0.33
+    ) {
+        const actionMap = {
+            shoot: shootBall,
+            through: throughPass,
+            lob: lobPass,
+            pass: passBall
+        };
+
+        const actionFunc = actionMap[gameState.pendingAction];
+        if (actionFunc && actionFunc(player, gameState.pendingActionPower)) {
+            initiatedAction = false;
+            gameState.pendingAction = null;
+            gameState.pendingActionPower = 0;
+        }
+    }
+
     if (isMoving) {
         // Normalize direction to get the desired movement direction (in world space)
         direction.normalize();

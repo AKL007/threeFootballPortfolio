@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { createLine } from './fieldMarkings.js';
 import { GOAL_COLORS, FIELD_MARKINGS_COLORS } from '../config/colors.js';
+import { gameState } from '../core/gameState.js';
 
 /**
  * Creates a soccer goal with posts, crossbar, and net wireframe.
@@ -76,6 +77,15 @@ export function createGoal(x, z) {
     );
     netMesh.position.set(0, goalHeight / 2, -goalDepth);
     goalGroup.add(netMesh);
+
+    if (!gameState.goalNets) {
+        gameState.goalNets = [];
+    }
+    gameState.goalNets.push({
+        mesh: netMesh,
+        halfWidth: goalWidth / 2,
+        halfHeight: goalHeight / 2
+    });
 
     // Position and rotate the whole goal at correct end.
     goalGroup.position.set(x, 0, z);
