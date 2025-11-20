@@ -89,6 +89,61 @@ function handleNetCollisions(ball) {
     }
 }
 
+function handleGoalLineCrossing(ball) {
+    const radius = BALL_PHYSICS.RADIUS;
+
+    const goalHalfWidth = 7.32 / 2;
+    const goalHalfHeight = 2.44 / 2;
+
+    if (ball.position.x < -55) {
+        // left goal
+        const goalLineX = -55;
+        const withinZ = ball.position.z >= -goalHalfWidth - radius && ball.position.z <= goalHalfWidth + radius;
+        const withinY = ball.position.y >= -goalHalfHeight - radius && ball.position.y <= goalHalfHeight + radius;
+        const withinX = (ball.position.x) <= goalLineX - radius;
+
+        if (withinX && withinY && withinZ) {
+            if (!gameState.justScored) {
+                gameState.homeScore++;
+                console.log('Home goal scored');
+                console.log('Home score:', gameState.homeScore);
+                console.log('Just scored:', gameState.justScored);
+                gameState.justScored = true;
+                
+                // Update scoreboard
+                if (gameState.scoreboardScreen?.userData.updateScore) {
+                    gameState.scoreboardScreen.userData.updateScore();
+                }
+            }
+        }
+    }
+    else if(ball.position.x > 55) {
+        // right goal
+        const goalLineX = 55;
+        const withinZ = ball.position.z >= -goalHalfWidth - radius && ball.position.z <= goalHalfWidth + radius;
+        const withinY = ball.position.y >= -goalHalfHeight - radius && ball.position.y <= goalHalfHeight + radius;
+        const withinX = (ball.position.x) >= goalLineX + radius;
+
+        if (withinX && withinY && withinZ) {
+            if (!gameState.justScored) {
+                gameState.awayScore++;
+                console.log('Away goal scored');
+                console.log('Away score:', gameState.awayScore);
+                console.log('Just scored:', gameState.justScored);
+                gameState.justScored = true;
+                
+                // Update scoreboard
+                if (gameState.scoreboardScreen?.userData.updateScore) {
+                    gameState.scoreboardScreen.userData.updateScore();
+                }
+            }
+        }
+    }
+    else {
+        gameState.justScored = false;
+    }
+}
+
 export function updateBall(delta, ball) {
     // Apply gravity
     gameState.ballVelocity.y -= BALL_PHYSICS.GRAVITY * delta;
@@ -119,6 +174,7 @@ export function updateBall(delta, ball) {
     
     handleNetCollisions(ball);
     handleInvisibleWallCollisions(ball);
+    handleGoalLineCrossing(ball)
 
     // Stop very slow movement
     if (gameState.ballVelocity.length() < BALL_PHYSICS.STOP_THRESHOLD) {

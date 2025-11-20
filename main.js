@@ -48,6 +48,13 @@ const stadium = createStadium(scene);
 scene.add(stadium);
 gameState.invisibleWalls = stadium.userData.invisibleWalls || [];
 
+// Store scoreboard reference in gameState for event-based updates
+stadium.traverse((child) => {
+    if (child.userData.updateScore) {
+        gameState.scoreboardScreen = child;
+    }
+});
+
 let player = null;
 let playerMixer = null;
 

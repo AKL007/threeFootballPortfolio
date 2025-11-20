@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 
 export const gameState = {
+    justScored: false,
+    homeScore: 0,
+    awayScore: 0,
     keys: {},
     playerVelocity: new THREE.Vector3(),
     ballVelocity: new THREE.Vector3(),
