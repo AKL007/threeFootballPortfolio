@@ -11,6 +11,7 @@ import './config/index.js'; // Make config available globally for UI play-testin
 import { createStadium } from './models/stadium.js';
 // import { createStadium } from './models/stadium-2.js';
 import { createPlayer } from './models/player.js';
+import { createPlayerMarker, updatePlayerMarker } from './models/playerMarker.js';
 import { createBall } from './models/ball.js';
 import { updateGrass } from './models/grass.js';
 
@@ -66,6 +67,9 @@ createPlayer((model, mixer) => {
     updatePlayerReference(player);
 });
 
+let playerMarker = createPlayerMarker();
+scene.add(playerMarker);
+
 const ball = createBall();
 scene.add(ball);
 setBallReference(ball); // Set ball reference for reset functionality
@@ -118,6 +122,7 @@ function animate() {
         }
         
         updatePlayerMovement(delta, player, ball);
+        updatePlayerMarker(player, playerMarker);
         updateCamera(delta, camera, player, ball);
         updateUI(player);
     }
