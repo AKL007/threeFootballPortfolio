@@ -152,6 +152,11 @@ export function updatePlayerMovement(delta, player, ball) {
         targetDirection.x += 1;
         isMoving = true;
     }
+
+    // if ball is not in possession, and targetDirection is facing towards ball, set targetDirection to ball position
+    if (!isBallInPossession() && targetDirection.dot(ball.position.clone().sub(player.position)) > 0) {
+        targetDirection.copy(ball.position.clone().sub(player.position).normalize());
+    }
     
     // Smoothly interpolate current input direction toward target direction
     // This creates analog-like behavior with continuous angles, not just 8 directions
