@@ -8,6 +8,9 @@ const worldQuaternion = new THREE.Quaternion();
 const normalComponent = new THREE.Vector3();
 const tangentialComponent = new THREE.Vector3();
 const localBallPosition = new THREE.Vector3();
+const previousBallPosition = new THREE.Vector3();
+const localPreviousBallPosition = new THREE.Vector3();
+const movementVector = new THREE.Vector3();
 
 function handleInvisibleWallCollisions(ball) {
     if (!gameState.invisibleWalls?.length) {
@@ -42,7 +45,7 @@ function handleInvisibleWallCollisions(ball) {
     }
 }
 
-function handleNetCollisions(ball) {
+function handleNetCollisions(ball, previousPosition) {
     if (!gameState.goalNets?.length) {
         return;
     }
@@ -58,32 +61,95 @@ function handleNetCollisions(ball) {
 
         planeNormal.copy(netLocalNormal).applyQuaternion(worldQuaternion).normalize();
 
+        // Convert both current and previous positions to local space
         localBallPosition.copy(ball.position);
         mesh.worldToLocal(localBallPosition);
+
+        localPreviousBallPosition.copy(previousPosition);
+        mesh.worldToLocal(localPreviousBallPosition);
 
         const radius = BALL_PHYSICS.RADIUS;
         const halfWidth = net.halfWidth ?? radius;
         const halfHeight = net.halfHeight ?? radius;
 
-        const withinX = localBallPosition.x >= -halfWidth - radius && localBallPosition.x <= halfWidth + radius;
-        const withinY = localBallPosition.y >= -halfHeight - radius && localBallPosition.y <= halfHeight + radius;
-        const penetrationDepth = radius - localBallPosition.z;
+        // Calculate movement in local space
+        movementVector.subVectors(localBallPosition, localPreviousBallPosition);
+        const movementLength = movementVector.length();
 
-        if (withinX && withinY && penetrationDepth > 0 && localBallPosition.z >= -radius) {
-            ball.position.addScaledVector(planeNormal, penetrationDepth);
+        // Check if ball is within net bounds (with some margin for movement)
+        const margin = radius + Math.abs(movementLength);
+        const withinX = localBallPosition.x >= -halfWidth - margin && localBallPosition.x <= halfWidth + margin;
+        const withinY = localBallPosition.y >= -halfHeight - margin && localBallPosition.y <= halfHeight + margin;
 
-            const velocity = gameState.ballVelocity;
-            const velocityAlongNormal = velocity.dot(planeNormal);
+        if (!withinX || !withinY) {
+            continue;
+        }
 
-            if (velocityAlongNormal < 0) {
-                normalComponent.copy(planeNormal).multiplyScalar(velocityAlongNormal);
-                tangentialComponent.copy(velocity).sub(normalComponent);
+        // Swept collision detection: check if ball's path intersects the net plane (z=0)
+        // The net plane is at z=0 in local space
+        const previousZ = localPreviousBallPosition.z;
+        const currentZ = localBallPosition.z;
+        const zDelta = currentZ - previousZ;
 
-                const bounceMagnitude = -velocityAlongNormal * BALL_PHYSICS.NET_BOUNCE_ENERGY_RETENTION;
-                normalComponent.copy(planeNormal).multiplyScalar(bounceMagnitude);
-                tangentialComponent.multiplyScalar(BALL_PHYSICS.NET_TANGENTIAL_ENERGY_RETENTION);
+        // Check if the ball crossed the net plane (z=0) during this frame
+        // We need to check if the path from previousZ to currentZ crosses z=0
+        const crossedPlane = (previousZ >= 0 && currentZ < 0) || (previousZ < 0 && currentZ >= 0);
 
-                velocity.copy(normalComponent).add(tangentialComponent);
+        if (crossedPlane && Math.abs(zDelta) > 0.0001) {
+            // Calculate intersection point with the net plane (z=0)
+            // t is the interpolation parameter: 0 = previous position, 1 = current position
+            const t = -previousZ / zDelta;
+            const intersectionZ = 0;
+
+            // Check if intersection point is within net bounds
+            const intersectionX = localPreviousBallPosition.x + movementVector.x * t;
+            const intersectionY = localPreviousBallPosition.y + movementVector.y * t;
+
+            const intersectionWithinX = intersectionX >= -halfWidth - radius && intersectionX <= halfWidth + radius;
+            const intersectionWithinY = intersectionY >= -halfHeight - radius && intersectionY <= halfHeight + radius;
+
+            if (intersectionWithinX && intersectionWithinY) {
+                // Ball hit the net - move it to the intersection point
+                const intersectionLocal = new THREE.Vector3(intersectionX, intersectionY, intersectionZ + radius);
+                const intersectionWorld = new THREE.Vector3();
+                intersectionWorld.copy(intersectionLocal);
+                mesh.localToWorld(intersectionWorld);
+                ball.position.copy(intersectionWorld);
+
+                // Handle bounce
+                const velocity = gameState.ballVelocity;
+                const velocityAlongNormal = velocity.dot(planeNormal);
+
+                if (velocityAlongNormal < 0) {
+                    normalComponent.copy(planeNormal).multiplyScalar(velocityAlongNormal);
+                    tangentialComponent.copy(velocity).sub(normalComponent);
+
+                    const bounceMagnitude = -velocityAlongNormal * BALL_PHYSICS.NET_BOUNCE_ENERGY_RETENTION;
+                    normalComponent.copy(planeNormal).multiplyScalar(bounceMagnitude);
+                    tangentialComponent.multiplyScalar(BALL_PHYSICS.NET_TANGENTIAL_ENERGY_RETENTION);
+
+                    velocity.copy(normalComponent).add(tangentialComponent);
+                }
+            }
+        } else {
+            // Check for static penetration (ball already inside net)
+            const penetrationDepth = radius - localBallPosition.z;
+            if (penetrationDepth > 0 && localBallPosition.z >= -radius) {
+                ball.position.addScaledVector(planeNormal, penetrationDepth);
+
+                const velocity = gameState.ballVelocity;
+                const velocityAlongNormal = velocity.dot(planeNormal);
+
+                if (velocityAlongNormal < 0) {
+                    normalComponent.copy(planeNormal).multiplyScalar(velocityAlongNormal);
+                    tangentialComponent.copy(velocity).sub(normalComponent);
+
+                    const bounceMagnitude = -velocityAlongNormal * BALL_PHYSICS.NET_BOUNCE_ENERGY_RETENTION;
+                    normalComponent.copy(planeNormal).multiplyScalar(bounceMagnitude);
+                    tangentialComponent.multiplyScalar(BALL_PHYSICS.NET_TANGENTIAL_ENERGY_RETENTION);
+
+                    velocity.copy(normalComponent).add(tangentialComponent);
+                }
             }
         }
     }
@@ -145,6 +211,9 @@ function handleGoalLineCrossing(ball) {
 }
 
 export function updateBall(delta, ball) {
+    // Store previous position for swept collision detection
+    previousBallPosition.copy(ball.position);
+    
     // Apply gravity
     gameState.ballVelocity.y -= BALL_PHYSICS.GRAVITY * delta;
     
@@ -172,7 +241,7 @@ export function updateBall(delta, ball) {
     }
     // No friction when ball is in air - only gravity affects it
     
-    handleNetCollisions(ball);
+    handleNetCollisions(ball, previousBallPosition);
     handleInvisibleWallCollisions(ball);
     handleGoalLineCrossing(ball)
 
