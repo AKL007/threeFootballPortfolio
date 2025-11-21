@@ -42,7 +42,7 @@ export const BALL_ACTIONS = {
     // Ball return to player
     BALL_RETURN: {
         DISTANCE_THRESHOLD: 1, // meters - distance to player to regain possession
-        VELOCITY_THRESHOLD: 0.5, // m/s - velocity threshold to check return
+        VELOCITY_THRESHOLD: 5, // m/s - velocity threshold to check return
     },
     
     // Direction calculation
