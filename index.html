@@ -46,9 +46,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 50px;
-            background: rgba(0, 0, 0, 0.3);
+            padding: 50px 50px;
+            background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(10px);
+            transition: background 0.1s ease-out;
         }
 
         .section-content {
@@ -67,6 +68,45 @@
             font-size: 1.2rem;
             line-height: 1.6;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .featured-strip {
+            margin-top: 60px;
+            margin-bottom: 60px;
+            padding: 40px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .featured-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .featured-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+
+        .featured-logo {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            transition: opacity 0.2s ease, color 0.2s ease;
+        }
+
+        .featured-logo:hover {
+            opacity: 1;
+            color: rgba(255, 255, 255, 1);
         }
 
         #ui {
@@ -201,9 +241,103 @@
                 opacity: 0.9;
             }
         }
+
+        #navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 15px 50px;
+            z-index: 200;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #navbar .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        #navbar .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+            align-items: center;
+        }
+
+        #navbar .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            transition: opacity 0.3s ease;
+            position: relative;
+        }
+
+        #navbar .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        #navbar .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: white;
+            transition: width 0.3s ease;
+        }
+
+        #navbar .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            #navbar {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            #navbar .nav-links {
+                gap: 20px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            #navbar .nav-links a {
+                font-size: 0.9rem;
+            }
+
+            .featured-logos {
+                gap: 30px;
+            }
+
+            .featured-logo {
+                font-size: 0.85rem;
+            }
+        }
     </style>
 </head>
 <body>
+    <nav id="navbar">
+        <a href="/" class="logo"></a>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <!-- <li><a href="/pages/projects">Projects</a></li> -->
+            <!-- <li><a href="/pages/blog">Blog</a></li> -->
+            <li><a href="/pages/contact">Contact</a></li>
+        </ul>
+    </nav>
+
     <div id="ui">
         <div>Speed: <span id="speed">0</span> km/h</div>
         <div>Position: <span id="position">0, 0</span></div>
@@ -238,11 +372,21 @@
                 <hr style="border: 1px solid rgba(255,255,255,0.3); margin: 2rem 0; width: 100px;">
                 <p style="font-size: 1.5rem; margin-bottom: 2rem;">Hi, I'm Akshay Lal</p>
                 <p style="text-align: left; max-width: 700px; margin: 0 auto;">
-                    I'm a tech founder and product builder with deep experience in AI, computer vision, and large-scale software. I co-founded the YC-backed startup Playment (acquired by TELUS International) and built ML/data infrastructure used by global teams, earning a spot on Forbes 30 Under 30 Asia. Now I'm focused on applying that engineering and product mindset to football analytics and performance technology.
+                    I'm a tech founder and product builder with deep experience in AI, computer vision, and SaaS. I co-founded the YC-backed data labelling startup Playment in 2015. In 2021, Playment was acquired by TELUS International. I have built ML/data infrastructure used by global teams, earning a spot on Forbes 30 Under 30 Asia. Now I'm focused on applying that engineering and product mindset to football analytics and performance technology.
                 </p>
                 <p style="text-align: left; max-width: 700px; margin: 2rem auto 0;">
                     Football has been a constant in my life — I play regularly in London and spend a lot of time experimenting with tracking, pose estimation, and tactical analysis tools. I'm especially interested in bridging elite-level analysis with practical, scalable software, and I love working with people in football who want to push the game forward.
                 </p>
+                
+                <div class="featured-strip">
+                    <div class="featured-label">Featured In</div>
+                    <div class="featured-logos">
+                        <a href="https://www.forbes.com/profile/playment/?list=30under30-asia-enterprise-technology" class="featured-logo" target="_blank" rel="noopener noreferrer">Forbes</a>
+                        <a href="https://yourstory.com/2021/11/future-ai-playment-telus-international-driving-disruption" class="featured-logo" target="_blank" rel="noopener noreferrer">YourStory</a>
+                        <a href="https://www.businesswire.com/news/home/20210706005219/en/TELUS-International-Acquires-Playment-Firmly-Staking-Its-Leadership-in-the-Global-Data-Annotation-Market" class="featured-logo" target="_blank" rel="noopener noreferrer">BusinessWire</a>
+                        <a href="https://inc42.com/buzz/indian-data-annotation-startup-playment-acquired-by-telus-international/" class="featured-logo" target="_blank" rel="noopener noreferrer">Inc42</a>
+                    </div>
+                </div>
             </div>
             <div class="scroll-indicator">
                 <div class="chevron"></div>
@@ -254,7 +398,7 @@
             <div class="section-content">   
                 <!-- <h1>Game</h1> -->
                 <hr style="border: 1px solid rgba(255,255,255,0.3); margin: 2rem 0; width: 100px;">
-                <p style="font-size: 1.5rem; margin-bottom: 2rem;">Kick about and learn more about my work</p>
+                <p style="font-size: 1.5rem; margin-bottom: 2rem;">Kick around to learn more about my work</p>
             </div>
             
         </section>
@@ -262,6 +406,67 @@
     
 
     <script type="module" src="/main.js"></script>
+    <script>
+        // Update section opacity based on scroll position
+        function updateSectionOpacity() {
+            const sections = document.querySelectorAll('.section');
+            const windowHeight = window.innerHeight;
+            const scrollPosition = window.scrollY;
+            const documentHeight = document.documentElement.scrollHeight;
+            
+            // Calculate scroll progress (0 at top, 1 at bottom)
+            const scrollProgress = Math.min(scrollPosition / (documentHeight - windowHeight), 1);
+            
+            sections.forEach((section, index) => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.offsetHeight;
+                const sectionCenter = sectionTop + sectionHeight / 2;
+                
+                // Calculate distance from viewport center
+                const viewportCenter = scrollPosition + windowHeight / 2;
+                const distanceFromCenter = Math.abs(sectionCenter - viewportCenter);
+                const maxDistance = windowHeight;
+                
+                // Calculate opacity based on scroll progress and section position
+                // Start at 0.9 opacity, decrease to 0.1 as you scroll down
+                const baseOpacity = 0.9;
+                const minOpacity = 0.1;
+                const opacity = Math.max(minOpacity, baseOpacity - (scrollProgress * (baseOpacity - minOpacity)));
+                
+                // Apply opacity to background
+                section.style.background = `rgba(0, 0, 0, ${opacity})`;
+            });
+            
+            // Hide navbar when game is in focus (at bottom of scroll)
+            const navbar = document.getElementById('navbar');
+            if (navbar) {
+                // Hide navbar when scroll progress is >= 0.95 (near bottom)
+                if (scrollProgress >= 0.95) {
+                    navbar.style.opacity = '0';
+                    navbar.style.pointerEvents = 'none';
+                    navbar.style.transition = 'opacity 0.3s ease-out';
+                } else {
+                    navbar.style.opacity = '1';
+                    navbar.style.pointerEvents = 'auto';
+                }
+            }
+        }
+        
+        // Throttle scroll events for better performance
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    updateSectionOpacity();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+        
+        // Initial call
+        updateSectionOpacity();
+    </script>
 </body>
 </html>
 
