@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Akshay Lal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow-x: hidden;
+            overflow-y: auto;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            min-height: 100vh;
+        }
+
+        #navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 15px 50px;
+            z-index: 200;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #navbar .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        #navbar .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+            align-items: center;
+        }
+
+        #navbar .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            transition: opacity 0.3s ease;
+            position: relative;
+        }
+
+        #navbar .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        #navbar .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: white;
+            transition: width 0.3s ease;
+        }
+
+        #navbar .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        #navbar .nav-links a.active {
+            opacity: 1;
+        }
+
+        #navbar .nav-links a.active::after {
+            width: 100%;
+        }
+
+        #content {
+            position: relative;
+            z-index: 2;
+            padding-top: 100px;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            text-align: center;
+            padding: 120px 20px 80px;
+            color: white;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .page-header p {
+            font-size: 1rem;
+            max-width: 500px;
+            margin: 0 auto;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 300;
+        }
+
+        .contact-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 50px 100px;
+        }
+
+        .contact-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .contact-item {
+            padding: 30px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .contact-item:last-child {
+            border-bottom: none;
+        }
+
+        .contact-item a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s ease;
+            display: block;
+        }
+
+        .contact-item a:hover {
+            opacity: 0.6;
+        }
+
+        .contact-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 300;
+        }
+
+        @media (max-width: 768px) {
+            #navbar {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            #navbar .nav-links {
+                gap: 20px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            #navbar .nav-links a {
+                font-size: 0.9rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .contact-container {
+                padding: 0 20px 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav id="navbar">
+        <a href="/" class="logo">Akshay Lal</a>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <!-- <li><a href="/pages/projects">Projects</a></li> -->
+            <!-- <li><a href="/pages/blog">Blog</a></li> -->
+            <li><a href="/pages/contact" class="active">Contact</a></li>
+        </ul>
+    </nav>
+
+    <div id="content">
+        <div class="page-header">
+            <h1>Get in touch</h1>
+        </div>
+
+        <div class="contact-container">
+            <ul class="contact-list">
+                <li class="contact-item">
+                    <div class="contact-label">Email</div>
+                    <a href="mailto:hello@akshaylal.com">hello@akshaylal.com</a>
+                </li>
+                <li class="contact-item">
+                    <div class="contact-label">LinkedIn</div>
+                    <a href="https://www.linkedin.com/in/akshaykumarlal/" target="_blank" rel="noopener noreferrer">linkedin.com/akshaykumarlal</a>
+                </li>
+                <li class="contact-item">
+                    <div class="contact-label">Twitter / X</div>
+                    <a href="https://x.com/AKL01" target="_blank" rel="noopener noreferrer">x.com/AKL01</a>
+                </li>
+                <li class="contact-item">
+                    <div class="contact-label">GitHub</div>
+                    <a href="https://github.com/AKL007" target="_blank" rel="noopener noreferrer">github.com/akshaylal</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+
