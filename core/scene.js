@@ -11,7 +11,11 @@ export function createScene() {
     // debug utils
     const debugHelper = new THREE.AxesHelper(2);
     debugHelper.position.set(0, 1, 0);
+    debugHelper.visible = false; // Start hidden
     scene.add(debugHelper);
+    
+    // Store reference to debug helper in scene userData for easy access
+    scene.userData.debugHelper = debugHelper;
 
     return scene;
 }

@@ -30,6 +30,24 @@ import { setupScrollListener, updatePlayerReference } from './camera/scrollContr
 import { updateUI } from './ui/ui.js';
 import './ui/configPanel.js'; // Initialize config panel
 
+// Debug toggle function
+function toggleDebugMode() {
+    gameState.debugMode = !gameState.debugMode;
+    
+    // Toggle UI element visibility (only show if debug mode is on and not in scroll mode)
+    const uiElement = document.getElementById('ui');
+    if (uiElement) {
+        uiElement.style.display = (gameState.debugMode && !gameState.scrollMode) ? 'block' : 'none';
+    }
+    
+    // Toggle AxesHelper visibility
+    if (scene.userData.debugHelper) {
+        scene.userData.debugHelper.visible = gameState.debugMode;
+    }
+    
+    console.log(`Debug mode: ${gameState.debugMode ? 'ON' : 'OFF'}`);
+}
+
 // Initialize scene
 const scene = createScene();
 const camera = createCamera();
@@ -87,6 +105,14 @@ setupScrollListener(camera, null);
 
 // Setup mobile controls (if on mobile device)
 setupMobileControls();
+
+// Setup debug mode keyboard shortcut (Ctrl/Cmd + D)
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault();
+        toggleDebugMode();
+    }
+});
 
 // Setup controls (will be set up after player loads)
 let controlsSetup = false;
