@@ -122,7 +122,8 @@ function updateContentLayerVisibility() {
                      (window.innerWidth <= 768 && 'ontouchstart' in window);
     
     if (uiElement) {
-        uiElement.style.display = gameState.scrollMode ? 'none' : 'block';
+        // Only show UI if debug mode is enabled and not in scroll mode
+        uiElement.style.display = (gameState.debugMode && !gameState.scrollMode) ? 'block' : 'none';
     }
     
     if (instructionsElement) {

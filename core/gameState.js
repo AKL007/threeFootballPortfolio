@@ -30,6 +30,7 @@ export const gameState = {
     scrollEndLookAt: null,
     invisibleWalls: [],
     goalNets: [],
-    currentInputDirection: new THREE.Vector3() // Smoothed input direction for analog-like movement
+    currentInputDirection: new THREE.Vector3(), // Smoothed input direction for analog-like movement
+    debugMode: false // Debug mode for showing/hiding debug UI and helpers
 };
 
