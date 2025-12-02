@@ -130,6 +130,20 @@ function updateContentLayerVisibility() {
         // Hide instructions on mobile, or based on scroll mode on desktop
         instructionsElement.style.display = (isMobile || gameState.scrollMode) ? 'none' : 'block';
     }
+    
+    // Hide mobile controls when in scroll mode (website area)
+    const mobileControlsContainer = document.getElementById('mobile-controls');
+    const resetButtonContainer = document.querySelector('.reset-button-container');
+    
+    if (mobileControlsContainer) {
+        // Hide controls when scrollMode is true (website area), show when false (3D scene area)
+        mobileControlsContainer.style.display = (isMobile && !gameState.scrollMode) ? 'block' : 'none';
+    }
+    
+    if (resetButtonContainer) {
+        // Hide reset button when in scroll mode (website area)
+        resetButtonContainer.style.display = (isMobile && !gameState.scrollMode) ? 'block' : 'none';
+    }
 }
 
 // Store camera and player references for scroll updates
