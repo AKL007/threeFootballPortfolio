@@ -18,7 +18,7 @@ import { updateGrass } from './models/grass.js';
 // Controls
 import { setupMouseControls } from './controls/mouse.js';
 import { setupKeyboardControls, setBallReference } from './controls/keyboard.js';
-import { setupMobileControls } from './controls/mobile.js';
+import { setupMobileControls, setPlayerReference as setMobilePlayerReference, setBallReference as setMobileBallReference } from './controls/mobile.js';
 
 // Game logic
 import { updatePlayerMovement } from './game/playerMovement.js';
@@ -66,6 +66,8 @@ createPlayer((model, mixer) => {
     scene.add(player);
     // Update scroll controller with player reference
     updatePlayerReference(player);
+    // Set player reference for mobile controls
+    setMobilePlayerReference(player);
 });
 
 let playerMarker = createPlayerMarker();
@@ -74,6 +76,7 @@ scene.add(playerMarker);
 const ball = createBall();
 scene.add(ball);
 setBallReference(ball); // Set ball reference for reset functionality
+setMobileBallReference(ball); // Set ball reference for mobile controls
 
 // Camera setup - start with top-down view for scroll animation
 camera.position.set(0, 200, 0);

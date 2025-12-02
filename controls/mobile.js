@@ -1,4 +1,5 @@
 import { gameState } from '../core/gameState.js';
+import { resetGameState } from '../game/reset.js';
 
 // Virtual joystick for movement
 class VirtualJoystick {
@@ -160,6 +161,51 @@ class ActionButton {
     }
 }
 
+// Store references to player and ball
+let playerRef = null;
+let ballRef = null;
+
+export function setPlayerReference(player) {
+    playerRef = player;
+}
+
+export function setBallReference(ball) {
+    ballRef = ball;
+}
+
+// Reset button class
+class ResetButton {
+    constructor(container) {
+        this.container = container;
+        this.button = document.createElement('div');
+        this.setupElement();
+        this.setupEvents();
+    }
+    
+    setupElement() {
+        this.button.className = 'reset-button';
+        this.button.textContent = 'Kick Off';
+        this.container.appendChild(this.button);
+    }
+    
+    setupEvents() {
+        const handleClick = (e) => {
+            e.preventDefault();
+            if (playerRef && ballRef && !gameState.flyMode) {
+                resetGameState(playerRef, ballRef);
+            }
+        };
+        
+        this.button.addEventListener('touchstart', handleClick, { passive: false });
+        this.button.addEventListener('touchend', (e) => {
+            e.preventDefault();
+        });
+        
+        // Mouse support for testing
+        this.button.addEventListener('click', handleClick);
+    }
+}
+
 // Main mobile controls setup
 export function setupMobileControls() {
     // Only show on mobile devices
@@ -169,6 +215,12 @@ export function setupMobileControls() {
     if (!isMobile) {
         return;
     }
+    
+    // Create reset button container (top right) - add directly to body
+    const resetContainer = document.createElement('div');
+    resetContainer.className = 'reset-button-container';
+    document.body.appendChild(resetContainer);
+    new ResetButton(resetContainer);
     
     // Create controls container
     const controlsContainer = document.createElement('div');
