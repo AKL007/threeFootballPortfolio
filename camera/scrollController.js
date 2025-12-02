@@ -117,12 +117,17 @@ function updateContentLayerVisibility() {
     const uiElement = document.getElementById('ui');
     const instructionsElement = document.getElementById('instructions');
     
+    // Check if mobile device
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                     (window.innerWidth <= 768 && 'ontouchstart' in window);
+    
     if (uiElement) {
         uiElement.style.display = gameState.scrollMode ? 'none' : 'block';
     }
     
     if (instructionsElement) {
-        instructionsElement.style.display = gameState.scrollMode ? 'none' : 'block';
+        // Hide instructions on mobile, or based on scroll mode on desktop
+        instructionsElement.style.display = (isMobile || gameState.scrollMode) ? 'none' : 'block';
     }
 }
 

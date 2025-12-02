@@ -18,6 +18,7 @@ import { updateGrass } from './models/grass.js';
 // Controls
 import { setupMouseControls } from './controls/mouse.js';
 import { setupKeyboardControls, setBallReference } from './controls/keyboard.js';
+import { setupMobileControls } from './controls/mobile.js';
 
 // Game logic
 import { updatePlayerMovement } from './game/playerMovement.js';
@@ -80,6 +81,9 @@ camera.lookAt(0, 0, 0);
 
 // Setup scroll listener immediately (works even before player loads)
 setupScrollListener(camera, null);
+
+// Setup mobile controls (if on mobile device)
+setupMobileControls();
 
 // Setup controls (will be set up after player loads)
 let controlsSetup = false;
