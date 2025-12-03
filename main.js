@@ -24,7 +24,7 @@ import { setupMobileControls, setPlayerReference as setMobilePlayerReference, se
 import { updatePlayerMovement } from './game/playerMovement.js';
 import { updateBall } from './game/ballPhysics.js';
 import { updateCamera } from './camera/cameraController.js';
-import { setupScrollListener, updatePlayerReference } from './camera/scrollController.js';
+import { setupScrollListener, updatePlayerReference, updateContentLayerVisibility } from './camera/scrollController.js';
 
 // UI
 import { updateUI } from './ui/ui.js';
@@ -105,6 +105,9 @@ setupScrollListener(camera, null);
 
 // Setup mobile controls (if on mobile device)
 setupMobileControls();
+
+// Update visibility immediately after mobile controls are created to prevent flash
+updateContentLayerVisibility();
 
 // Setup debug mode keyboard shortcut (Ctrl/Cmd + D)
 document.addEventListener('keydown', (e) => {

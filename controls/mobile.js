@@ -219,6 +219,8 @@ export function setupMobileControls() {
     // Create reset button container (top right) - add directly to body
     const resetContainer = document.createElement('div');
     resetContainer.className = 'reset-button-container';
+    // Hide initially - will be shown by scroll controller based on scroll mode
+    resetContainer.style.display = 'none';
     document.body.appendChild(resetContainer);
     new ResetButton(resetContainer);
     
@@ -226,6 +228,8 @@ export function setupMobileControls() {
     const controlsContainer = document.createElement('div');
     controlsContainer.id = 'mobile-controls';
     controlsContainer.className = 'mobile-controls-container';
+    // Hide initially - will be shown by scroll controller based on scroll mode
+    controlsContainer.style.display = 'none';
     document.body.appendChild(controlsContainer);
     
     // Create joystick container (bottom left)
