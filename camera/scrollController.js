@@ -101,7 +101,7 @@ export function updateScrollCamera(camera, player) {
     updateContentLayerVisibility();
 }
 
-function updateContentLayerVisibility() {
+export function updateContentLayerVisibility() {
     const contentLayer = document.getElementById('content');
     if (contentLayer) {
         if (gameState.scrollMode) {
